@@ -16,11 +16,21 @@ load_dotenv(dotenv_path=BASE_DIR / ".env")
 
 from auth import router as auth_router
 
+from contextlib import asynccontextmanager
+from database import init_db
+import models # 모델들을 임포트해야 테이블이 생성됩니다.
+
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Giterra Backend")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 서버 기동 시 DB 테이블 생성
+    await init_db()
+    yield
+
+app = FastAPI(title="Giterra Backend", lifespan=lifespan)
 
 # CORS 설정
 app.add_middleware(
@@ -31,7 +41,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# [변경점] 분리된 Auth 라우터 등록
+# 분리된 Auth 라우터 등록
 app.include_router(auth_router)
 
 
