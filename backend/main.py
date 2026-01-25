@@ -2,11 +2,16 @@ import os
 import re
 import httpx
 import asyncio
+import logging
 from typing import List, Optional, Dict
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from collections import Counter
+
+# 로깅 설정
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # .env 로드
 load_dotenv()
@@ -20,7 +25,7 @@ HEADERS = {
     "Accept": "application/vnd.github.v3+json"
 }
 
-# --- 데이터 모델 ---
+# 데이터 모델 
 
 class AnalyzeRequest(BaseModel):
     github_username: str
@@ -33,10 +38,10 @@ class RepoInfo(BaseModel):
     language: Optional[str]
     url: str
 
-# --- 유틸리티 함수 ---
+# 유틸리티 함수
 
 async def fetch_repo_details(client: httpx.AsyncClient, user: str, repo: str):
-    """커밋 로그와 사용 언어를 함께 수집합니다."""
+    """커밋 로그와 사용 언어를 함께 수집합니다 (에러 처리 강화)."""
     commit_url = f"https://api.github.com/repos/{user}/{repo}/commits?per_page=50"
     lang_url = f"https://api.github.com/repos/{user}/{repo}/languages"
     
@@ -44,34 +49,52 @@ async def fetch_repo_details(client: httpx.AsyncClient, user: str, repo: str):
         # 커밋과 언어 정보를 병렬로 가져오기
         commit_res, lang_res = await asyncio.gather(
             client.get(commit_url, headers=HEADERS),
-            client.get(lang_url, headers=HEADERS)
+            client.get(lang_url, headers=HEADERS),
+            return_exceptions=True
         )
-        
-        # 1. 커밋 분석
+
+        # 기초 데이터 초기화
         stats = {"feat": 0, "fix": 0, "docs": 0, "refactor": 0, "test": 0, "chore": 0}
         total_commits = 0
-        if commit_res.status_code == 200:
-            commits = commit_res.json()
-            total_commits = len(commits)
-            for commit in commits:
-                msg = commit['commit']['message'].lower()
-                for key in stats.keys():
-                    if re.search(r'\b' + key + r'\b', msg):
-                        stats[key] += 1
+        languages = {}
+
+        # 커밋 응답 처리
+        if isinstance(commit_res, httpx.Response):
+            if commit_res.status_code == 200:
+                commits = commit_res.json()
+                total_commits = len(commits)
+                for commit in commits:
+                    msg = commit['commit']['message'].lower()
+                    for key in stats.keys():
+                        if re.search(r'\b' + key + r'\b', msg):
+                            stats[key] += 1
+            elif commit_res.status_code == 409:
+                logger.warning(f"Repo {repo} is empty (409 Conflict)")
+            elif commit_res.status_code == 403:
+                logger.error("GitHub API Rate limit exceeded (403 Forbidden)")
+            else:
+                logger.error(f"Failed to fetch commits for {repo}: {commit_res.status_code}")
         
-        # 2. 언어 분석 (byte 단위)
-        languages = lang_res.json() if lang_res.status_code == 200 else {}
-        
+        # 언어 응답 처리
+        if isinstance(lang_res, httpx.Response):
+            if lang_res.status_code == 200:
+                languages = lang_res.json()
+            else:
+                logger.warning(f"Failed to fetch languages for {repo}: {lang_res.status_code}")
+
         return {
             "repo": repo,
             "total_commits": total_commits,
             "commit_stats": stats,
-            "languages": languages
+            "languages": languages,
+            "status": "success" if total_commits > 0 or languages else "partial_success"
         }
-    except Exception as e:
-        return {"repo": repo, "error": str(e)}
 
-# --- API 엔드포인트 ---
+    except Exception as e:
+        logger.exception(f"Unexpected error analyzing {repo}")
+        return {"repo": repo, "error": str(e), "status": "failed"}
+
+# API 엔드포인트
 
 @app.get("/")
 async def root():
@@ -83,21 +106,27 @@ async def get_user_repositories(username: str):
         raise HTTPException(status_code=500, detail="GITHUB_TOKEN not configured")
     
     async with httpx.AsyncClient() as client:
-        url = f"https://api.github.com/users/{username}/repos?sort=updated&per_page=100"
-        response = await client.get(url, headers=HEADERS)
-        
-        if response.status_code != 200:
-            raise HTTPException(status_code=response.status_code, detail="User not found")
-        
-        return [
-            RepoInfo(
-                name=r['name'],
-                description=r['description'],
-                stars=r['stargazers_count'],
-                language=r['language'],
-                url=r['html_url']
-            ) for r in response.json()
-        ]
+        try:
+            url = f"https://api.github.com/users/{username}/repos?sort=updated&per_page=100"
+            response = await client.get(url, headers=HEADERS)
+            
+            if response.status_code == 404:
+                raise HTTPException(status_code=404, detail="User not found")
+            if response.status_code != 200:
+                raise HTTPException(status_code=response.status_code, detail="GitHub API Error")
+            
+            return [
+                RepoInfo(
+                    name=r['name'],
+                    description=r['description'],
+                    stars=r['stargazers_count'],
+                    language=r['language'],
+                    url=r['html_url']
+                ) for r in response.json()
+            ]
+        except httpx.RequestError as e:
+            logger.error(f"Network error: {e}")
+            raise HTTPException(status_code=503, detail="GitHub API connection failed")
 
 @app.post("/analyze")
 async def analyze_selected_repos(request: AnalyzeRequest):
@@ -111,22 +140,21 @@ async def analyze_selected_repos(request: AnalyzeRequest):
         tasks = [fetch_repo_details(client, user, repo) for repo in repos]
         results = await asyncio.gather(*tasks)
 
-        # 1. 전체 커밋 통계 합산
+        # 전체 커밋 통계 합산
         total_stats = Counter()
         for r in results:
             if "commit_stats" in r:
                 total_stats.update(r["commit_stats"])
         
-        # 2. 전체 언어 통계 합산 (Bytes 기준)
+        # 전체 언어 통계 합산 (Bytes 기준)
         total_languages = Counter()
         for r in results:
             if "languages" in r:
                 total_languages.update(r["languages"])
         
-        # 상위 3개 언어 추출
         top_languages = dict(total_languages.most_common(3))
         
-        # 3. 성향 결정 (복합 로직)
+        # 성향 결정
         persona = "평화로운 들판 (Normal)"
         if total_stats["feat"] > total_stats["fix"]:
             persona = "미래 도시 숲 (Builder)"
@@ -134,6 +162,9 @@ async def analyze_selected_repos(request: AnalyzeRequest):
             persona = "연구소 돔 (Fixer)"
         elif total_stats["docs"] > total_stats["feat"]:
             persona = "지식의 도서관 (Documenter)"
+        # 아무 결과가 없을 때 
+        elif sum(total_stats.values()) == 0 and not top_languages:
+            persona = "새싹이 돋아나는 땅 (Beginner)"
 
         return {
             "status": "success",
@@ -141,7 +172,8 @@ async def analyze_selected_repos(request: AnalyzeRequest):
                 "username": user,
                 "persona": persona,
                 "main_languages": list(top_languages.keys()),
-                "total_commit_summary": dict(total_stats)
+                "total_commit_summary": dict(total_stats),
+                "has_warnings": any(r.get("status") != "success" for r in results)
             },
             "language_distribution": dict(total_languages),
             "detailed_results": results
