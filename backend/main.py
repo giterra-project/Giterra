@@ -11,6 +11,8 @@ from typing import List, TypedDict, Annotated
 import operator
 from dotenv import load_dotenv
 from collections import Counter
+from graph import langgraph_app
+from schemas import AnalyzeRequest, RepoAnalysisResult
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
@@ -50,9 +52,6 @@ KEYWORD_MAP = {
     "chore": ["chore", "build", "config", "setting", "설정", "배포"]
 }
 
-class AnalyzeRequest(BaseModel):
-    github_username: str
-    selected_repos: List[str]
 
 class RepoInfo(BaseModel):
     name: str
@@ -150,29 +149,6 @@ async def get_user_repositories(username: str):
         except httpx.RequestError as e:
             logger.error(f"Network error: {e}")
             raise HTTPException(status_code=503, detail="GitHub API connection failed")
-
-# 1. 개별 레포지토리 분석 결과 상태
-class RepoAnalysisState(TypedDict):
-    repo_name: str
-    commits: List[str] # 커밋 메시지들
-    # 각 관점의 분석 결과
-    tech_score: str
-    stability_score: str
-    comm_score: str
-    # 레포 요약 결과
-    repo_summary: str
-
-# 2. 전체 그래프 상태 (Overall State)
-class GiterraState(TypedDict):
-    github_username: str
-    repos_data: List[dict] # Raw Data
-    
-    # 각 레포별 분석 결과들을 모으는 리스트 (Reducer 사용)
-    repo_summaries: Annotated[List[str], operator.add] 
-    
-    final_persona: str      # 최종 개발자 성향 (타이틀)
-    final_description: str  # 최종 설명
-    visualization_data: dict # 시각화용 JSON
 
 # 1. 개별 레포지토리 분석 결과 상태
 class RepoAnalysisState(TypedDict):
