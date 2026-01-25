@@ -25,7 +25,17 @@ HEADERS = {
     "Accept": "application/vnd.github.v3+json"
 }
 
-# 데이터 모델 
+# 설정 및 데이터 구조
+
+# 분석할 키워드 맵
+KEYWORD_MAP = {
+    "feat": ["feat", "add", "create", "implement", "추가", "구현", "생성"],
+    "fix": ["fix", "bug", "patch", "issue", "수정", "해결", "고침", "오류"],
+    "docs": ["docs", "readme", "document", "문서", "설명", "주석"],
+    "refactor": ["refactor", "clean", "simplify", "개선", "리팩"],
+    "test": ["test", "testing", "spec", "테스트"],
+    "chore": ["chore", "build", "config", "setting", "설정", "배포"]
+}
 
 class AnalyzeRequest(BaseModel):
     github_username: str
@@ -38,49 +48,49 @@ class RepoInfo(BaseModel):
     language: Optional[str]
     url: str
 
-# 유틸리티 함수
+# 유틸리티 함수 
 
 async def fetch_repo_details(client: httpx.AsyncClient, user: str, repo: str):
-    """커밋 로그와 사용 언어를 함께 수집합니다 (에러 처리 강화)."""
+    """커밋 로그와 사용 언어를 함께 수집합니다 (유연한 키워드 분석)."""
     commit_url = f"https://api.github.com/repos/{user}/{repo}/commits?per_page=50"
     lang_url = f"https://api.github.com/repos/{user}/{repo}/languages"
     
     try:
-        # 커밋과 언어 정보를 병렬로 가져오기
         commit_res, lang_res = await asyncio.gather(
             client.get(commit_url, headers=HEADERS),
             client.get(lang_url, headers=HEADERS),
             return_exceptions=True
         )
 
-        # 기초 데이터 초기화
-        stats = {"feat": 0, "fix": 0, "docs": 0, "refactor": 0, "test": 0, "chore": 0}
+        stats = {key: 0 for key in KEYWORD_MAP.keys()}
         total_commits = 0
         languages = {}
 
-        # 커밋 응답 처리
-        if isinstance(commit_res, httpx.Response):
-            if commit_res.status_code == 200:
-                commits = commit_res.json()
-                total_commits = len(commits)
-                for commit in commits:
-                    msg = commit['commit']['message'].lower()
-                    for key in stats.keys():
-                        if re.search(r'\b' + key + r'\b', msg):
-                            stats[key] += 1
-            elif commit_res.status_code == 409:
+        # 커밋 분석
+        if isinstance(commit_res, httpx.Response) and commit_res.status_code == 200:
+            commits = commit_res.json()
+            total_commits = len(commits)
+            for commit in commits:
+                msg = commit['commit']['message'].lower()
+                
+                # 카테고리당 최대 1점만 부여 
+                # 예: "feat: 기능 추가 및 성능 개선" -> feat 1점, refactor 1점
+                for category, keywords in KEYWORD_MAP.items():
+                    if any(kw in msg for kw in keywords):
+                        stats[category] += 1
+        elif isinstance(commit_res, httpx.Response):
+            if commit_res.status_code == 409:
                 logger.warning(f"Repo {repo} is empty (409 Conflict)")
             elif commit_res.status_code == 403:
                 logger.error("GitHub API Rate limit exceeded (403 Forbidden)")
             else:
                 logger.error(f"Failed to fetch commits for {repo}: {commit_res.status_code}")
         
-        # 언어 응답 처리
-        if isinstance(lang_res, httpx.Response):
-            if lang_res.status_code == 200:
-                languages = lang_res.json()
-            else:
-                logger.warning(f"Failed to fetch languages for {repo}: {lang_res.status_code}")
+        # 언어 분석
+        if isinstance(lang_res, httpx.Response) and lang_res.status_code == 200:
+            languages = lang_res.json()
+        elif isinstance(lang_res, httpx.Response):
+            logger.warning(f"Failed to fetch languages for {repo}: {lang_res.status_code}")
 
         return {
             "repo": repo,
