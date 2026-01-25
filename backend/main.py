@@ -10,6 +10,10 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from collections import Counter
 
+from contextlib import asynccontextmanager
+from database import init_db
+import models # 모델들을 임포트해야 테이블이 생성됩니다.
+
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -17,7 +21,13 @@ logger = logging.getLogger(__name__)
 # .env 로드
 load_dotenv()
 
-app = FastAPI(title="Giterra Backend")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 서버 기동 시 DB 테이블 생성
+    await init_db()
+    yield
+
+app = FastAPI(title="Giterra Backend", lifespan=lifespan)
 
 # CORS 설정
 # 개발 단계에서는 모두 허용, 배포 시에는 특정 도메인만 허용
