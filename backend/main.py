@@ -1,5 +1,4 @@
 import os
-import re
 import httpx
 import asyncio
 import logging
@@ -11,20 +10,34 @@ from typing import List, TypedDict, Annotated
 import operator
 from dotenv import load_dotenv
 from collections import Counter
+from pathlib import Path
 from graph import langgraph_app
 from schemas import AnalyzeRequest, RepoAnalysisResult
+
+
+# .env 로드
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(dotenv_path=BASE_DIR / ".env")
+
+from auth import router as auth_router
+
+from contextlib import asynccontextmanager
+from database import init_db
+import models # 모델들을 임포트해야 테이블이 생성됩니다.
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# .env 로드
-load_dotenv()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 서버 기동 시 DB 테이블 생성
+    await init_db()
+    yield
 
-app = FastAPI(title="Giterra Backend")
+app = FastAPI(title="Giterra Backend", lifespan=lifespan)
 
 # CORS 설정
-# 개발 단계에서는 모두 허용, 배포 시에는 특정 도메인만 허용
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  
@@ -33,14 +46,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 분리된 Auth 라우터 등록
+app.include_router(auth_router)
+
+
+print(f"DEBUG: GITHUB_CLIENT_ID is {os.getenv('GITHUB_CLIENT_ID')}")
+
+
 # 설정
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 HEADERS = {
     "Authorization": f"token {GITHUB_TOKEN}",
     "Accept": "application/vnd.github.v3+json"
 }
-
-# 설정 및 데이터 구조
 
 # 분석할 키워드 맵
 KEYWORD_MAP = {
@@ -149,29 +167,6 @@ async def get_user_repositories(username: str):
         except httpx.RequestError as e:
             logger.error(f"Network error: {e}")
             raise HTTPException(status_code=503, detail="GitHub API connection failed")
-
-# 1. 개별 레포지토리 분석 결과 상태
-class RepoAnalysisState(TypedDict):
-    repo_name: str
-    commits: List[str] # 커밋 메시지들
-    # 각 관점의 분석 결과
-    tech_score: str
-    stability_score: str
-    comm_score: str
-    # 레포 요약 결과
-    repo_summary: str
-
-# 2. 전체 그래프 상태 (Overall State)
-class GiterraState(TypedDict):
-    github_username: str
-    repos_data: List[dict] # Raw Data
-    
-    # 각 레포별 분석 결과들을 모으는 리스트 (Reducer 사용)
-    repo_summaries: Annotated[List[str], operator.add] 
-    
-    final_persona: str      # 최종 개발자 성향 (타이틀)
-    final_description: str  # 최종 설명
-    visualization_data: dict # 시각화용 JSON
 
 @app.post("/analyze")
 async def analyze_selected_repos(request: AnalyzeRequest):
