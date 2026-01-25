@@ -1,10 +1,12 @@
 import os
 import httpx
+from pathlib import Path
 from fastapi import APIRouter, status, Header, HTTPException
 from fastapi.responses import RedirectResponse
 from dotenv import load_dotenv
 
-load_dotenv()
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(dotenv_path=BASE_DIR / ".env")
 
 GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")
 GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET")

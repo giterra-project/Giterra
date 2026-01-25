@@ -8,16 +8,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from collections import Counter
+from pathlib import Path
 
-# [변경점] 분리한 auth 모듈 임포트
+# .env 로드
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(dotenv_path=BASE_DIR / ".env")
+
 from auth import router as auth_router
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# .env 로드
-load_dotenv()
 
 app = FastAPI(title="Giterra Backend")
 
@@ -32,6 +33,10 @@ app.add_middleware(
 
 # [변경점] 분리된 Auth 라우터 등록
 app.include_router(auth_router)
+
+
+print(f"DEBUG: GITHUB_CLIENT_ID is {os.getenv('GITHUB_CLIENT_ID')}")
+
 
 # 설정
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
