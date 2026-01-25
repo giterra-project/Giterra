@@ -5,6 +5,7 @@ import asyncio
 import logging
 from typing import List, Optional, Dict
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from collections import Counter
@@ -17,6 +18,16 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 app = FastAPI(title="Giterra Backend")
+
+# CORS 설정
+# 개발 단계에서는 모두 허용, 배포 시에는 특정 도메인만 허용
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # 설정
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
