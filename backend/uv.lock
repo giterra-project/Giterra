@@ -43,6 +43,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "fastapi" },
+    { name = "httpx" },
     { name = "langchain-google-genai" },
     { name = "langgraph" },
     { name = "python-dotenv" },
@@ -52,6 +53,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = ">=0.128.0" },
+    { name = "httpx", specifier = ">=0.28.1" },
     { name = "langchain-google-genai", specifier = ">=4.2.0" },
     { name = "langgraph", specifier = ">=1.0.7" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
