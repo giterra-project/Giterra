@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🚀 Giterra Backend Setup Guide
 
 Giterra 프로젝트의 백엔드 개발 환경 구축 가이드입니다.
@@ -37,6 +38,28 @@ uv run uvicorn main:app --reload
 - **API 문서 확인**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) (Swagger UI)
 
 ## 🐘 데이터베이스 확인 (Tip)
-VS Code의 전용 확장 프로그램인 **SQLTools**를 설치하면 DB 내부를 한눈에 볼 수 있습니다.
-- 설치: `SQLTools`, `SQLTools PostgreSQL/Cockroach Driver`
-- 연결 정보: `.env`에 적은 정보를 그대로 입력하세요.
+## ⚙️ 환경 변수 및 인증 설정 (.env)
+
+이 프로젝트를 실행하기 위해서는 프로젝트 최상위 경로(Giterra/) 또는 `backend/` 경로에 `.env` 파일을 생성하고 아래 정보를 입력해야 합니다.
+
+### 1. `.env` 파일 양식
+```env
+# [데이터 분석용 - GitHub Personal Access Token]
+# 'your_password' 자리에 본인의 DB 비밀번호를 넣으세요. (뒤의 @는 그대로 두어야 합니다.)
+GITHUB_TOKEN=your_personal_access_token_here
+DATABASE_URL=postgresql+asyncpg://postgres:your_password@localhost:5432/postgres
+
+# [로그인용 - GitHub OAuth App]
+GITHUB_CLIENT_ID=여기에_Client_ID_입력
+GITHUB_CLIENT_SECRET=여기에_Client_Secret_입력
+FRONTEND_URL=http://localhost:3000
+```
+
+### 2. 가이드
+#### 🔑 GitHub OAuth (로그인용) 및 Token (분석용) 발급
+1. **OAuth:** [GitHub Developer Settings](https://github.com/settings/developers)에서 New OAuth App 생성
+   - **Callback URL**: `http://localhost:8000/auth/callback` 필수!
+2. **Token:** [GitHub Personal Access Tokens](https://github.com/settings/tokens)에서 repo, user 권한 체크 후 발급
+
+---
+*(자세한 발급 단계는 기존 가이드를 참고해 주세요)*
