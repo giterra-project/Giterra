@@ -45,7 +45,7 @@ uv run uvicorn main:app --reload
 ### 1. `.env` 파일 양식
 ```env
 # [데이터 분석용 - GitHub Personal Access Token]
-# 'your_password' 자리에 본인의 DB 비밀번호를 넣으세요. (뒤의 @는 그대로 두어야 합니다.)
+# 'your_password' 자리에 본인의 DB 비밀번호를 넣으세요.
 GITHUB_TOKEN=your_personal_access_token_here
 DATABASE_URL=postgresql+asyncpg://postgres:your_password@localhost:5432/postgres
 

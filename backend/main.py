@@ -41,7 +41,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# [변경점] 분리된 Auth 라우터 등록
+# 분리된 Auth 라우터 등록
 app.include_router(auth_router)
 
 
