@@ -29,7 +29,7 @@ class Repository(SQLModel, table=True):
     analysis_sub2: Optional[str] = None
     analysis_sub3: Optional[str] = None
     
-    last_analyzed: Optional[datetime] = Field(default_factory=datetime.utcnow)
+    last_analyzed: Optional[datetime] = Field(default_factory=datetime.now)
     latest_commit: Optional[datetime] = None
     
     # 관계 설정

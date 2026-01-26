@@ -1,18 +1,13 @@
-import os
 import httpx
-from pathlib import Path
 from fastapi import APIRouter, status, Header, HTTPException
 from fastapi.responses import RedirectResponse
-from dotenv import load_dotenv
+from app.core.config import settings
 
-BASE_DIR = Path(__file__).resolve().parent
-load_dotenv(dotenv_path=BASE_DIR / ".env")
+router = APIRouter()
 
-GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")
-GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET")
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
-
-router = APIRouter(prefix="/auth", tags=["Authentication"])
+GITHUB_CLIENT_ID = settings.GITHUB_CLIENT_ID
+GITHUB_CLIENT_SECRET = settings.GITHUB_CLIENT_SECRET
+FRONTEND_URL = settings.FRONTEND_URL
 
 # 1. GitHub 로그인 (POST /auth/login)
 @router.post("/login")
