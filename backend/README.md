@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 🚀 Giterra Backend Setup Guide
 
 Giterra 프로젝트의 백엔드 개발 환경 구축 가이드입니다.
@@ -15,11 +14,19 @@ Giterra 프로젝트의 백엔드 개발 환경 구축 가이드입니다.
 `backend` 폴더 안에 `.env` 파일을 만들고 아래 코드를 복사하세요.
 
 ```env
+# [데이터 분석용 - GitHub Personal Access Token]
+# 'your_password' 자리에 본인의 DB 비밀번호를 넣으세요.
 GITHUB_TOKEN=your_personal_access_token_here
 
 # 'your_password' 자리에 본인의 DB 비밀번호를 넣으세요. (뒤의 @는 그대로 두어야 합니다.)
 # 로컬 설치 시 기본 DB와 유저는 'postgres'입니다.
-DATABASE_URL=postgresql+asyncpg://postgres:your_password@localhost:5432/postgres
+# 포스트그레 Admin을 사용해 giterra라는 새로운 데이터 베이스를 만들어서 사용해도 됩니다.
+DATABASE_URL=postgresql+psycopg://postgres:your_password@localhost:5432/[DB 이름]
+
+# [로그인용 - GitHub OAuth App]
+GITHUB_CLIENT_ID=여기에_Client_ID_입력
+GITHUB_CLIENT_SECRET=여기에_Client_Secret_입력
+FRONTEND_URL=http://localhost:3000
 ```
 
 ### 2. 의존성 설치
@@ -30,7 +37,7 @@ uv sync
 
 ## 🏃 실행 (Run)
 
-아래 명령어로 서버를 웁니다. (최초 실행 시 테이블이 자동 생성됩니다.)
+아래 명령어로 서버를 실행 시킵니다. (최초 실행 시 테이블이 자동 생성됩니다.)
 ```bash
 uv run uvicorn main:app --reload
 ```
@@ -38,22 +45,11 @@ uv run uvicorn main:app --reload
 - **API 문서 확인**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) (Swagger UI)
 
 ## 🐘 데이터베이스 확인 (Tip)
-## ⚙️ 환경 변수 및 인증 설정 (.env)
-
-이 프로젝트를 실행하기 위해서는 프로젝트 최상위 경로(Giterra/) 또는 `backend/` 경로에 `.env` 파일을 생성하고 아래 정보를 입력해야 합니다.
-
-### 1. `.env` 파일 양식
-```env
-# [데이터 분석용 - GitHub Personal Access Token]
-# 'your_password' 자리에 본인의 DB 비밀번호를 넣으세요.
-GITHUB_TOKEN=your_personal_access_token_here
-DATABASE_URL=postgresql+asyncpg://postgres:your_password@localhost:5432/postgres
-
-# [로그인용 - GitHub OAuth App]
-GITHUB_CLIENT_ID=여기에_Client_ID_입력
-GITHUB_CLIENT_SECRET=여기에_Client_Secret_입력
-FRONTEND_URL=http://localhost:3000
-```
+1. PostgreSQL Windows 최신버전 다운로드
+2. 모두 기본세팅으로 설치, 관리자 비밀번호 설정, 마지막 stack은 설치하지 않음!
+3. pgAdmin 4 실행 후 좌측 서버를 클릭하면 관리자 비밀번호 입력창이 나옴
+4. Admin 로그인한 뒤 Databases 우클릭 -> Create로 새로운 데이터 베이스 생성가능
+5. 기본 postreas 데이터베이스를 사용해도 되고 새로 생성해도 됨 단, 반드시 .env의 DATABASE_URL의 마지막 [DB 이름]에 알맞는 이름을 넣어서 사용
 
 ### 2. 가이드
 #### 🔑 GitHub OAuth (로그인용) 및 Token (분석용) 발급
@@ -63,3 +59,28 @@ FRONTEND_URL=http://localhost:3000
 
 ---
 *(자세한 발급 단계는 기존 가이드를 참고해 주세요)*
+
+## Backend Refactoring
+```text
+giterra-backend/
+├── pyproject.toml
+├── .env                 # API KEY, DB URL 등
+├── main.py              # [입구] 앱 실행 및 라우터 통합
+└── app/
+    ├── __init__.py
+    ├── core/
+    │   └── config.py    # [설정] 환경변수 로드 관리
+    ├── database.py      # [DB] 세션(Session) 및 연결 설정 (engine)
+    ├── models.py        # [DB] PostgreSQL 테이블 정의 (SQLAlchemy)
+    ├── schemas.py       # [데이터] Pydantic 모델 (Request/Response)
+    │
+    ├── routers/         # API 엔드포인트를 기능별로 분리
+    │   ├── __init__.py
+    │   ├── auth.py      # (예: /auth/github, /auth/callback)
+    │   └── analyze.py   # (예: /analyze)
+    │
+    └── services/        # [핵심 로직] 비즈니스 로직 분리
+        ├── __init__.py
+        ├── github.py    # GitHub API 호출 함수들
+        └── graph.py     # LangGraph AI 로직
+```

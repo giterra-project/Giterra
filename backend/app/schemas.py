@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 
 # --- 1. 데이터 모델 정의 (Pydantic) ---
 
@@ -15,3 +15,10 @@ class RepoAnalysisResult(BaseModel):
     stability_view: str = Field(description="안정성 및 유지보수 관점 분석 (Agent B)")
     comm_view: str = Field(description="소통 및 컨벤션 관점 분석 (Agent C)")
     summary: str = Field(description="이 레포지토리의 종합 요약")
+
+class RepoInfo(BaseModel):
+    name: str
+    description: Optional[str]
+    stars: int
+    language: Optional[str]
+    url: str

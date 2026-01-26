@@ -1,16 +1,16 @@
-from sqlmodel import SQLModel, create_engine
+from sqlmodel import SQLModel
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-import os
-from dotenv import load_dotenv
+from app.core.config import settings
 
-load_dotenv()
-
-# .env에서 DATABASE_URL을 가져오거나 기본값 사용
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://myuser:mypassword@localhost:5432/giterra")
+DATABASE_URL = settings.DATABASE_URL
 
 # 비동기 엔진 생성
-engine = create_async_engine(DATABASE_URL, echo=True, future=True)
+engine = create_async_engine(
+    DATABASE_URL, 
+    echo=True, 
+    future=True, 
+)
 
 # 비동기 세션 생성기
 async_session = sessionmaker(
