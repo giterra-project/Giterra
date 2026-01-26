@@ -1,20 +1,34 @@
-import { Canvas } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AnimatePresence } from 'framer-motion';
+import MainPage from './pages/Main/MainPage';
+import PlanetPage from './pages/Planet/PlanetPage';
+import LoginCallback from './pages/Login/LoginCallback';
+
+const queryClient = new QueryClient();
+
+
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  return (
+    <AnimatePresence>
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<MainPage />} />
+        <Route path="/login/callback" element={<LoginCallback />} />
+        <Route path="/planet" element={<PlanetPage />} />
+      </Routes>
+    </AnimatePresence>
+  );
+};
 
 function App() {
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
-      <Canvas>
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} />
-        <mesh>
-          <boxGeometry args={[2, 2, 2]} />
-          <meshStandardMaterial color="orange" />
-        </mesh>
-        <OrbitControls />
-      </Canvas>
-    </div>
-  )
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AnimatedRoutes />
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
 }
 
-export default App
+export default App;
