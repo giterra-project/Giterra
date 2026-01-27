@@ -63,10 +63,42 @@
 
 ---
 
-## 📅 5. 개발 로그 (Dev Log)
+## 📡 5. API 데이터 스냅샷 (Data Snapshot)
+
+다른 파트(프론트엔드 등)와의 협업을 위한 실제 응답 데이터의 구조입니다.
+
+### 분석 결과 샘플 (Response)
+```json
+{
+  "status": "success",
+  "summary": {
+    "username": "jih19984",
+    "persona": "연구소 돔 (Fixer)",
+    "main_languages": ["Python"],
+    "total_commit_summary": {
+      "feat": 1, "fix": 1, "docs": 0, "refactor": 0, "test": 0, "chore": 0
+    }
+  },
+  "detailed_results": [
+    {
+      "repo": "TIL_Summary",
+      "total_commits": 10,
+      "commit_stats": { "feat": 1, "fix": 1, "docs": 0, "refactor": 0 },
+      "languages": { "Python": 6474 },
+      "latest_commit_date": "2025-10-09T13:11:16",
+      "status": "success"
+    }
+  ]
+}
+```
+
+---
+
+## 📅 6. 개발 로그 (Dev Log)
 
 ### 2026-01-28
 - ✅ GitHub OAuth 콜백 시 DB 유저 정보Upsert 로직 구현
 - ✅ `AnalyzeSelectedRepos` 서비스 내 분석 결과 DB 저장 기능 추가
 - ✅ 레포지토리별 최신 커밋 날짜(`latest_commit`) 자동 추적 및 저장
 - ✅ 서비스 함수와 라우터 함수의 재귀 호출 버그 해결
+- ✅ 데이터 분석 결과 API 스냅샷 문서화 및 임시 파일 정리
