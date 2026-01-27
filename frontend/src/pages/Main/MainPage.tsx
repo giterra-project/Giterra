@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, useMotionValue, useTransform, type PanInfo } from 'framer-motion';
+import { motion, useMotionValue, useSpring, type PanInfo, animate } from 'framer-motion';
 import { Search, HandMetal } from 'lucide-react';
 import Header from '../../components/layout/Header';
 import { useLanguageStore } from '../../store/useLanguageStore';
+import { useAuthStore } from '../../store/useAuthStore';
 
 const RADIUS = 600;
 
@@ -48,30 +49,86 @@ const BackgroundSphere = () => (
 const MainPage = () => {
     const navigate = useNavigate();
     const { t } = useLanguageStore();
-    const [currentPage, setCurrentPage] = useState<number>(0);
-    const dragX = useMotionValue(0);
+    const { user } = useAuthStore();
 
-    const rotateY = useTransform(dragX, (x: number) => {
-        const currentBase = currentPage * -180;
-        const rotationSensitivity = 0.2;
-        return currentBase + (x * rotationSensitivity);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [githubId, setGithubId] = useState('');
+
+    useEffect(() => {
+        if (user?.login) {
+            setGithubId(user.login);
+        }
+    }, [user]);
+
+    const rotationY = useMotionValue(0);
+    const smoothRotationY = useSpring(rotationY, {
+        stiffness: 80,
+        damping: 25,
+        mass: 0.8,
+        restDelta: 0.01
     });
 
-    const handleDragEnd = (_: unknown, info: PanInfo) => {
-        const velocityThreshold = 500;
-        const distanceThreshold = 150;
+    const isAnimating = useRef(false);
 
-        if (info.velocity.x < -velocityThreshold || info.offset.x < -distanceThreshold) {
-            setCurrentPage(1);
-        } else if (info.velocity.x > velocityThreshold || info.offset.x > distanceThreshold) {
-            setCurrentPage(0);
+    useEffect(() => {
+        const unsubscribe = smoothRotationY.on("change", (latest) => {
+            const normalized = Math.round(latest / 180) % 2;
+            setCurrentPage(Math.abs(normalized));
+        });
+        return () => unsubscribe();
+    }, [smoothRotationY]);
+
+    const handleDrag = (_: any, info: PanInfo) => {
+        if (isAnimating.current) return;
+        const sensitivity = 0.35;
+        rotationY.set(rotationY.get() + info.delta.x * sensitivity);
+    };
+
+    const handleDragEnd = (_: any, info: PanInfo) => {
+        const currentRotation = rotationY.get();
+        const velocity = info.velocity.x;
+        const offset = info.offset.x;
+
+        let targetRotation;
+        if (Math.abs(velocity) > 200 || Math.abs(offset) > 100) {
+            targetRotation = velocity > 0
+                ? Math.ceil(currentRotation / 180) * 180
+                : Math.floor(currentRotation / 180) * 180;
+        } else {
+            targetRotation = Math.round(currentRotation / 180) * 180;
         }
 
-        dragX.set(0);
+        isAnimating.current = true;
+        animate(rotationY, targetRotation, {
+            type: "spring",
+            stiffness: 100,
+            damping: 25,
+            onComplete: () => {
+                isAnimating.current = false;
+            }
+        });
+    };
+
+    const handleDotClick = (index: number) => {
+        const currentRotation = rotationY.get();
+        const currentBase = Math.round(currentRotation / 360) * 360;
+        const targetRotation = index === 0 ? currentBase : currentBase - 180;
+
+        animate(rotationY, targetRotation, {
+            type: "spring",
+            stiffness: 100,
+            damping: 25
+        });
     };
 
     const handleSearch = () => {
         navigate('/planet');
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
     };
 
     return (
@@ -79,10 +136,10 @@ const MainPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.5 } }}
-            className="relative h-screen w-screen overflow-hidden perspective-container bg-black"
+            className="relative h-screen w-screen overflow-hidden bg-black"
+            style={{ perspective: '2000px' }}
         >
             <Header />
-
             <DragVisualGuide />
 
             <div className="relative flex h-full w-full items-center justify-center preserve-3d">
@@ -92,30 +149,34 @@ const MainPage = () => {
                     drag="x"
                     dragConstraints={{ left: 0, right: 0 }}
                     dragElastic={0}
-                    style={{ rotateY, x: 0 }}
-                    animate={{ rotateY: currentPage === 0 ? 0 : -180 }}
+                    onDrag={handleDrag}
                     onDragEnd={handleDragEnd}
-                    transition={{
-                        type: 'spring',
-                        stiffness: 100,
-                        damping: 30,
-                        restDelta: 0.001
+                    style={{
+                        rotateY: smoothRotationY,
+                        x: 0,
+                        transformStyle: 'preserve-3d'
                     }}
-                    className="relative h-full w-full preserve-3d z-10 cursor-grab active:cursor-grabbing"
+                    className="relative h-full w-full z-10 cursor-grab active:cursor-grabbing"
                 >
                     <div
                         className="absolute inset-0 flex flex-col items-center justify-center backface-hidden"
                         style={{ transform: `rotateY(0deg) translateZ(${RADIUS}px)` }}
                     >
                         <div className="text-center select-none">
-                            <h1 className="text-7xl font-extrabold pt-18 drop-shadow-2xl">Giterra</h1>
+                            <h1 className="text-7xl font-extrabold pt-18 drop-shadow-2xl text-white">Giterra</h1>
                             <p className="mt-6 text-xl text-gray-400">
                                 {t('당신의 개발 역사를 하나의 행성으로 시각화하세요', 'Visualize your development history as a planet')}
                             </p>
 
-                            <div className="mt-14 flex w-[480px] items-center gap-2 rounded-2xl bg-white/5 p-1.5 backdrop-blur-xl border border-white/10 shadow-2xl mx-auto">
+                            <div
+                                className="mt-14 flex w-[480px] items-center gap-2 rounded-2xl bg-white/5 p-1.5 backdrop-blur-xl border border-white/10 shadow-2xl mx-auto"
+                                onPointerDown={(e) => e.stopPropagation()}
+                            >
                                 <input
                                     type="text"
+                                    value={githubId}
+                                    onChange={(e) => setGithubId(e.target.value)}
+                                    onKeyDown={handleKeyDown}
                                     placeholder={t('깃허브 아이디 입력', 'Enter GitHub ID')}
                                     className="flex-1 bg-transparent px-5 py-3 text-lg outline-none text-white placeholder:text-gray-500"
                                 />
@@ -135,7 +196,7 @@ const MainPage = () => {
                     >
                         <div className="flex w-full max-w-6xl items-center justify-between px-20 select-none">
                             <div className="h-96 w-[45%] rounded-[40px] bg-gradient-to-br from-indigo-600/40 to-purple-700/40 border border-white/10 shadow-3xl shadow-indigo-500/10 backdrop-blur-md" />
-                            <div className="w-[45%] text-left">
+                            <div className="w-[45%] text-left text-white">
                                 <h2 className="text-5xl font-bold leading-tight">
                                     {t('커밋 데이터 기반', 'Based on Commit Data')}
                                     <br />
@@ -157,9 +218,8 @@ const MainPage = () => {
                 {[0, 1].map((idx: number) => (
                     <button
                         key={idx}
-                        onClick={() => setCurrentPage(idx)}
-                        className={`h-2 rounded-full transition-all duration-500 ${currentPage === idx ? 'w-10 bg-white' : 'w-2 bg-white/20'
-                            }`}
+                        onClick={() => handleDotClick(idx)}
+                        className={`h-2 rounded-full transition-all duration-500 ${currentPage === idx ? 'w-10 bg-white' : 'w-2 bg-white/20'}`}
                     />
                 ))}
             </div>
