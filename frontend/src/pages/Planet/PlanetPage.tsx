@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { Search, ChevronRight, RotateCcw } from 'lucide-react';
 import Header from '../../components/layout/Header';
 import { useLanguageStore } from '../../store/useLanguageStore';
