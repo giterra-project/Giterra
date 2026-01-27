@@ -1,7 +1,11 @@
 import httpx
-from fastapi import APIRouter, status, Header, HTTPException
+from fastapi import APIRouter, status, Header, HTTPException, Depends
 from fastapi.responses import RedirectResponse
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select
 from app.core.config import settings
+from app.database import get_session
+from app.models import User
 
 router = APIRouter()
 
@@ -19,7 +23,7 @@ async def github_login():
 
 # 2. 인증 콜백 (GET /auth/callback)
 @router.get("/callback")
-async def github_callback(code: str):
+async def github_callback(code: str, db: AsyncSession = Depends(get_session)):
     async with httpx.AsyncClient() as client:
         # 토큰 교환
         token_res = await client.post(
@@ -42,17 +46,32 @@ async def github_callback(code: str):
             headers={"Authorization": f"token {access_token}"}
         )
         u = user_res.json()
+        github_id = str(u.get("id"))
         
-        # [image_7cb97e.png] USERS 테이블 구조 반영
-        user_record = {
-            "github_id": str(u.get("id")),      # UK: 깃허브 ID
-            "username": u.get("login"),         # 유저 닉네임
-            "avatar_url": u.get("avatar_url"),   # 프로필 사진 URL
-            "html_url": u.get("html_url"),       # 깃허브 프로필 주소
-            "access_token": access_token         # API 접속 토큰
-        }
+        # DB 저장 로직 (Upsert)
+        statement = select(User).where(User.github_id == github_id)
+        result = await db.execute(statement)
+        db_user = result.scalars().first()
 
-        # TODO: DB 저장 로직 (PostgreSQL) 연동 지점
+        if db_user:
+            # 정보 업데이트
+            db_user.username = u.get("login")
+            db_user.avatar_url = u.get("avatar_url")
+            db_user.html_url = u.get("html_url")
+            db_user.access_token = access_token
+        else:
+            # 신규 생성
+            db_user = User(
+                github_id=github_id,
+                username=u.get("login"),
+                avatar_url=u.get("avatar_url"),
+                html_url=u.get("html_url"),
+                access_token=access_token
+            )
+            db.add(db_user)
+        
+        await db.commit()
+        await db.refresh(db_user)
 
         return RedirectResponse(f"{FRONTEND_URL}/login/success?token={access_token}")
 
@@ -78,9 +97,28 @@ async def github_logout():
 
 # 5. 회원 탈퇴 (DELETE /auth/user)
 @router.delete("/user")
-async def withdraw_user(authorization: str = Header(None)):
+async def withdraw_user(authorization: str = Header(None), db: AsyncSession = Depends(get_session)):
     if not authorization:
         raise HTTPException(status_code=401, detail="인증 정보가 없습니다.")
     
-    # TODO: DB에서 해당 유저 삭제 로직 추가
-    return {"status": "success", "message": "회원 탈퇴 완료"}
+    async with httpx.AsyncClient() as client:
+        user_res = await client.get(
+            "https://api.github.com/user",
+            headers={"Authorization": authorization}
+        )
+        if user_res.status_code != 200:
+             raise HTTPException(status_code=401, detail="유효하지 않은 토큰입니다.")
+        
+        u = user_res.json()
+        github_id = str(u.get("id"))
+
+        statement = select(User).where(User.github_id == github_id)
+        result = await db.execute(statement)
+        db_user = result.scalars().first()
+
+        if db_user:
+            await db.delete(db_user)
+            await db.commit()
+            return {"status": "success", "message": "회원 탈퇴 완료"}
+        else:
+            raise HTTPException(status_code=404, detail="유저를 찾을 수 없습니다.")

@@ -2,6 +2,7 @@ import httpx
 import httpx
 import asyncio
 import logging
+from datetime import datetime
 from app.schemas import AnalyzeRequest
 from app.schemas import RepoInfo
 from fastapi import HTTPException
@@ -107,32 +108,126 @@ async def get_user_repositories(username: str):
             logger.error(f"Network error: {e}")
             raise HTTPException(status_code=503, detail="GitHub API connection failed")
 
-async def analyze_selected_repos(request: AnalyzeRequest):
-    user = request.github_username
-    repos = request.selected_repos
+from sqlmodel import select
+from app.models import User, Repository
+from sqlalchemy.ext.asyncio import AsyncSession
 
-    if not repos:
+async def analyze_repo_details(client: httpx.AsyncClient, user: str, repo: str):
+    """개별 레포지토리의 상세 정보를 수집하고 가공합니다."""
+    commit_url = f"https://api.github.com/repos/{user}/{repo}/commits?per_page=50"
+    lang_url = f"https://api.github.com/repos/{user}/{repo}/languages"
+    
+    try:
+        commit_res, lang_res = await asyncio.gather(
+            client.get(commit_url, headers=HEADERS),
+            client.get(lang_url, headers=HEADERS),
+            return_exceptions=True
+        )
+
+        stats = {key: 0 for key in KEYWORD_MAP.keys()}
+        total_commits = 0
+        languages = {}
+
+        # 커밋 분석
+        latest_commit_date = None
+        if isinstance(commit_res, httpx.Response) and commit_res.status_code == 200:
+            commits = commit_res.json()
+            total_commits = len(commits)
+            if total_commits > 0:
+                # 첫 번째 커밋(최신)의 날짜 추출
+                date_str = commits[0]['commit']['committer']['date']
+                latest_commit_date = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%SZ")
+
+            for commit in commits:
+                msg = commit['commit']['message'].lower()
+                for category, keywords in KEYWORD_MAP.items():
+                    if any(kw in msg for kw in keywords):
+                        stats[category] += 1
+        
+        # 언어 분석
+        if isinstance(lang_res, httpx.Response) and lang_res.status_code == 200:
+            languages = lang_res.json()
+
+        return {
+            "repo": repo,
+            "total_commits": total_commits,
+            "commit_stats": stats,
+            "languages": languages,
+            "latest_commit_date": latest_commit_date,
+            "status": "success" if total_commits > 0 or languages else "partial_success"
+        }
+    except Exception as e:
+        logger.exception(f"Error analyzing {repo}")
+        return {"repo": repo, "error": str(e), "status": "failed"}
+
+async def analyze_selected_repos(request: AnalyzeRequest, db: AsyncSession):
+    user_name = request.github_username
+    repo_names = request.selected_repos
+
+    if not repo_names:
         raise HTTPException(status_code=400, detail="No repos selected")
 
+    # 1. DB에서 유저 확인
+    statement = select(User).where(User.username == user_name)
+    result = await db.execute(statement)
+    db_user = result.scalars().first()
+    
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found in DB. Please login first.")
+
     async with httpx.AsyncClient() as client:
-        tasks = [fetch_repo_details(client, user, repo) for repo in repos]
+        tasks = [analyze_repo_details(client, user_name, repo) for repo in repo_names]
         results = await asyncio.gather(*tasks)
 
-        # 전체 커밋 통계 합산
+        # 전체 통계 합산 및 개별 저장
         total_stats = Counter()
+        total_languages = Counter()
+        
         for r in results:
+            if r.get("status") == "failed":
+                continue
+                
             if "commit_stats" in r:
                 total_stats.update(r["commit_stats"])
-        
-        # 전체 언어 통계 합산 (Bytes 기준)
-        total_languages = Counter()
-        for r in results:
             if "languages" in r:
                 total_languages.update(r["languages"])
-        
+            
+            # 개별 레포지토리 DB 저장/업데이트
+            repo_name = r["repo"]
+            repo_stmt = select(Repository).where(Repository.user_id == db_user.id, Repository.name == repo_name)
+            repo_res = await db.execute(repo_stmt)
+            db_repo = repo_res.scalars().first()
+            
+            # 레포별 성향 결정 (간단)
+            repo_stats = r["commit_stats"]
+            repo_type = "Normal"
+            if repo_stats["feat"] > repo_stats["fix"]: repo_type = "Builder"
+            elif repo_stats["fix"] > 0: repo_type = "Fixer"
+
+            # 최신 커밋 날짜 추출
+            latest_commit_date = None
+            if "latest_commit_date" in r:
+                latest_commit_date = r["latest_commit_date"]
+
+            if db_repo:
+                db_repo.analysis_type = repo_type
+                db_repo.analysis_summary = f"Commits: {r['total_commits']}, Langs: {list(r['languages'].keys())}"
+                db_repo.last_analyzed = datetime.now()
+                if latest_commit_date:
+                    db_repo.latest_commit = latest_commit_date
+            else:
+                db_repo = Repository(
+                    user_id=db_user.id,
+                    name=repo_name,
+                    analysis_type=repo_type,
+                    analysis_summary=f"Commits: {r['total_commits']}, Langs: {list(r['languages'].keys())}",
+                    last_analyzed=datetime.now(),
+                    latest_commit=latest_commit_date
+                )
+                db.add(db_repo)
+
+        # 전체 성향 결정
         top_languages = dict(total_languages.most_common(3))
-        
-        # 성향 결정
         persona = "평화로운 들판 (Normal)"
         if total_stats["feat"] > total_stats["fix"]:
             persona = "미래 도시 숲 (Builder)"
@@ -140,19 +235,18 @@ async def analyze_selected_repos(request: AnalyzeRequest):
             persona = "연구소 돔 (Fixer)"
         elif total_stats["docs"] > total_stats["feat"]:
             persona = "지식의 도서관 (Documenter)"
-        # 아무 결과가 없을 때 
         elif sum(total_stats.values()) == 0 and not top_languages:
             persona = "새싹이 돋아나는 땅 (Beginner)"
+
+        await db.commit()
 
         return {
             "status": "success",
             "summary": {
-                "username": user,
+                "username": user_name,
                 "persona": persona,
                 "main_languages": list(top_languages.keys()),
-                "total_commit_summary": dict(total_stats),
-                "has_warnings": any(r.get("status") != "success" for r in results)
+                "total_commit_summary": dict(total_stats)
             },
-            "language_distribution": dict(total_languages),
             "detailed_results": results
         }
