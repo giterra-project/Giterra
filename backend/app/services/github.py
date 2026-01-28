@@ -226,17 +226,42 @@ async def analyze_selected_repos(request: AnalyzeRequest, db: AsyncSession):
                 )
                 db.add(db_repo)
 
-        # 전체 성향 결정
+        # 가공 로직: 휴리스틱 가중치 적용
+        WEIGHTS = {
+            "feat": 1.0,
+            "refactor": 2.0,
+            "test": 2.7,
+            "fix": 4.0,
+            "docs": 4.0,
+            "chore": 1.0 
+        }
+
+        # 페르소나 명칭 매핑
+        PERSONA_NAMES = {
+            "feat": "미래 도시 숲 (Builder)",
+            "refactor": "장인의 정원 (Refactorer)",
+            "test": "심해의 관측 기지 (Tester)",
+            "fix": "연구소 돔 (Fixer)",
+            "docs": "지식의 도서관 (Documenter)"
+        }
+
+        # 항목별 점수 산출
+        scores = {}
+        for key in KEYWORD_MAP.keys():
+            weight = WEIGHTS.get(key, 1.0)
+            scores[key] = round(total_stats[key] * weight, 1)
+
+        # 최종 페르소나 결정
+        total_score = sum(scores.values())
         top_languages = dict(total_languages.most_common(3))
-        persona = "평화로운 들판 (Normal)"
-        if total_stats["feat"] > total_stats["fix"]:
-            persona = "미래 도시 숲 (Builder)"
-        elif total_stats["fix"] > total_stats["refactor"]:
-            persona = "연구소 돔 (Fixer)"
-        elif total_stats["docs"] > total_stats["feat"]:
-            persona = "지식의 도서관 (Documenter)"
-        elif sum(total_stats.values()) == 0 and not top_languages:
+
+        if total_score < 5:  # 데이터 부족하면 기본
             persona = "새싹이 돋아나는 땅 (Beginner)"
+        else:
+            # 점수가 가장 높은 카테고리 추출 
+            # 점수가 같을 시 우선순위대로 정렬 (우선순위: Fix > Docs > Test > Refactor > Feat)
+            dominant_trait = max(scores, key=scores.get)
+            persona = PERSONA_NAMES.get(dominant_trait, "평화로운 들판 (Normal)")
 
         await db.commit()
 
@@ -246,7 +271,9 @@ async def analyze_selected_repos(request: AnalyzeRequest, db: AsyncSession):
                 "username": user_name,
                 "persona": persona,
                 "main_languages": list(top_languages.keys()),
-                "total_commit_summary": dict(total_stats)
+                "total_score": round(total_score, 1),
+                "commit_stats": dict(total_stats),
+                "weighted_scores": scores
             },
             "detailed_results": results
         }
