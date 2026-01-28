@@ -95,7 +95,7 @@ async def get_user_repositories(username: str):
             if response.status_code != 200:
                 raise HTTPException(status_code=response.status_code, detail="GitHub API Error")
             
-            return [
+            repos = [
                 RepoInfo(
                     name=r['name'],
                     description=r['description'],
@@ -105,6 +105,11 @@ async def get_user_repositories(username: str):
                     updated_at=r['updated_at']
                 ) for r in response.json()
             ]
+
+            # Giter라 표준 정렬 로직 적용: Star 많은 순 -> 최신 업데이트 순
+            repos.sort(key=lambda x: (x.stars, x.updated_at), reverse=True)
+            
+            return repos
         except httpx.RequestError as e:
             logger.error(f"Network error: {e}")
             raise HTTPException(status_code=503, detail="GitHub API connection failed")
