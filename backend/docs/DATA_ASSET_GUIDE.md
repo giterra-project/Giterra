@@ -20,20 +20,15 @@ uv run scripts/load_seed.py
 
 ---
 
-## 🧠 2. 데이터 분석 원리 (Heuristic Weighting)
+## 🧠 2. 데이터 분석 원리 (Summary)
 
-Giterra는 단순 커밋 횟수가 아닌, 활동의 **'희소 가중치(Scarcity Weighting)'**를 기반으로 유저의 페르소나를 결정합니다.
+Giterra는 단순 커밋 횟수가 아닌 활동의 **'희소 가중치'**를 기반으로 유저의 페르소나를 결정합니다. 상세한 수치와 설계 배경은 [데이터 파이프라인 문서](./DATA_PIPELINE.md)를 참조하세요.
 
-### ⚖️ 커밋 타입별 가중치 (Weights)
-가중치가 높을수록 해당 성향을 나타내는 '결정적 증거'로 간주됩니다.
-
-| 커밋 타입 | 가중치 | 페르소나 (Persona) | 설명 |
-| :--- | :--- | :--- | :--- |
-| **Feat** | **1.0** | **미래 도시 숲 (Builder)** | 기능 구현 중심의 개척자 |
-| **Refactor** | **3.0** | **장인의 정원 (Refactorer)** | 코드 품질을 개선하는 조경사 |
-| **Test** | **4.0** | **심해의 관측 기지 (Tester)** | 시스템의 안정성을 지키는 수호자 |
-| **Fix** | **4.0** | **연구소 돔 (Fixer)** | 버그를 해결하는 전문 해결사 |
-| **Docs** | **4.0** | **지식의 도서관 (Documenter)** | 기록을 통해 지식을 전파하는 기록가 |
+### ⚖️ 가중치 정책 (Weighting Policy)
+*   **고가치 활동**: `Test`, `Fix`, `Docs` (전문성 및 유지보수 역량)
+*   **중간 가치**: `Refactor` (구조 개선 역량)
+*   **기준 활동**: `Feat` (기본 구현 활동)
+*   👉 *상세 가중치 수치는 [DATA_PIPELINE.md - 페르소나 분석 로직](./DATA_PIPELINE.md#4-페르소나-분석-로직-persona-analysis-logic)에서 확인할 수 있습니다.*
 
 ### 🛠️ 우선순위 알고리즘 (Best 8 System)
 사용자가 분석을 요청하면, 시스템은 자동으로 다음 기준에 따라 가장 가치 있는 **8개의 레포지토리**를 선정합니다.
@@ -61,6 +56,23 @@ Giterra는 단순 커밋 횟수가 아닌, 활동의 **'희소 가중치(Scarcit
 *   **Documenter**: `jwasham`, `donnemartin`
 *   **Refactorer**: `woowacourse`
 *   **Tester**: `aelassas` (가장 희귀한 타입)
+
+---
+
+## 🚀 5. 새로운 데이터 추가 수집하기 (Collecting More Data)
+
+팀원들이 직접 특정 유저를 분석해서 DB에 넣고 공유하고 싶을 때 아래 절차를 따릅니다.
+
+1.  **아이디 추가**: `scripts/batch_collector.py` 파일의 `NAMED_USERS` 리스트에 분석하고 싶은 GitHub 아이디를 추가합니다.
+2.  **수집 및 분석 실행**: 아래 명령어를 실행하면 해당 유저의 상위 8개 레포지토리를 자동으로 분석하여 DB에 저장합니다.
+    ```bash
+    uv run scripts/batch_collector.py
+    ```
+3.  **데이터 공유 (Optional)**: 수집된 데이터를 다른 팀원들과 공유하고 싶다면, 데이터를 추출하여 커밋합니다.
+    ```bash
+    uv run scripts/dump_seed.py
+    # 이후 생성된 backend/data/seed_data.json 파일을 git commit & push
+    ```
 
 ---
 *최종 업데이트: 2026-01-29 - Giterra Backend Team*
