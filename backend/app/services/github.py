@@ -101,7 +101,8 @@ async def get_user_repositories(username: str):
                     description=r['description'],
                     stars=r['stargazers_count'],
                     language=r['language'],
-                    url=r['html_url']
+                    url=r['html_url'],
+                    updated_at=r['updated_at']
                 ) for r in response.json()
             ]
         except httpx.RequestError as e:

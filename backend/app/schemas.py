@@ -22,3 +22,4 @@ class RepoInfo(BaseModel):
     stars: int
     language: Optional[str]
     url: str
+    updated_at: str
