@@ -235,8 +235,8 @@ async def analyze_selected_repos(request: AnalyzeRequest, db: AsyncSession):
         # 가공 로직: 휴리스틱 가중치 적용
         WEIGHTS = {
             "feat": 1.0,
-            "refactor": 2.0,
-            "test": 2.7,
+            "refactor": 3.0,
+            "test": 4.0,
             "fix": 4.0,
             "docs": 4.0,
             "chore": 1.0 

@@ -15,18 +15,35 @@ from app.services.github import get_user_repositories, analyze_selected_repos
 from app.schemas import AnalyzeRequest
 from sqlmodel import select
 
-# 수집 대상 글로벌 네임드 개발자 리스트 (10명으로 확대)
+# 수집 대상 글로벌 & 국내 네임드 개발자 (페르소나별 분류)
 NAMED_USERS = [
-    "tiangolo",    # FastAPI
-    "yyx990803",   # Vue.js
-    "antfu",       # Vite/Vue Core
-    "sindresorhus", # OSS King
-    "karpathy",     # AI/Deep Learning
-    "tj",          # Node.js/Go pioneer
-    "gaearon",     # React/Redux (Dan Abramov)
-    "defunkt",     # GitHub co-founder
-    "mojombo",     # GitHub co-founder
-    "kennethreitz" # Requests creator
+    # 🌲 미래 도시 숲 (Builder): 새로운 기능 창조와 확장에 강점
+    "antfu",          # Vite/Vue Core
+    "sindresorhus",   # Global OSS King
+    "karpathy",       # AI/Deep Learning (LLM implementations)
+    "velopert",       # React Education/Full-stack
+    "jojoldu",        # Java/Backend Tech Blog
+
+    # 🔬 연구소 돔 (Fixer): 시스템 안정성 및 이슈 해결 중심
+    "tiangolo",       # FastAPI (Docker/Environment management focus)
+    "yyx990803",      # Vue.js Creator (Framework maintenance)
+    "godorm",         # Cloud IDE Platform maintenance
+
+    # 📚 지식의 도서관 (Documenter): 기록과 가이드 제작에 특화
+    "jwasham",        # coding-interview-university
+    "donnemartin",    # system-design-primer
+    "kamranahmedse",  # developer-roadmap
+
+    # 🪴 장인의 정원 (Refactorer): 코드 품질 개선 및 설계 최적화
+    "woowacourse",     # 클린 코드 및 리팩토링 미션 중심 (확실한 Refactorer 표본)
+
+    # 🔭 심해의 관측 기지 (Tester): 테스트 코드와 안정성 수호 (신규 후보)
+    "aelassas",       # TDD Guide & Implementation focus
+    "dwyl",           # Learn TDD & Testing methodologies
+    "jeonghwan-kim",  # Frontend Testing (TDD 강의 등 활동)
+    
+    # 🌱 새싹이 돋아나는 땅 (Beginner): 탐험을 시작한 유저 예시
+    "leebyeongmin"    # 데이터 부족 시 Fallback 테스트용
 ]
 
 async def collect_user_data(username: str):
