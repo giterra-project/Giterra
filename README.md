@@ -235,3 +235,49 @@
 
 - [ ]  최종 시연
 - [ ]  제출
+
+
+---
+# Giterra Frontend Folder Structure & Responsibilities
+
+##
+- 초기 페이지, 행성 페이지 초안 구성 완료
+- 초기 페이지에서 검색 버튼 누르면 행성페이지로 이동, 행성 페이지에서 행성 클릭하면 UI 등장
+- 한영 전환 버튼 추가, 초기 화면 회전 애니메이션 추가
+
+## 1. src/assets/
+- 이미지, 아이콘 및 3D 모델링 파일(.glb, .gltf) 저장소
+- 행성 테마별 오브젝트(미래 도시, 연구소, 숲, 나무) 파일 관리
+
+## 2. src/components/
+- 재사용 가능한 UI 컴포넌트들의 집합
+- **common/**: 버튼, 입력창 등 프로젝트 전반에서 쓰이는 공통 UI
+- **layout/**: Header, Footer, Sidebar 등 페이지 외곽 프레임
+- **planet/**: Three.js 기반 3D 행성 렌더링 및 시각화 전용 컴포넌트
+- **repository/**: 레포지토리 리스트 출력 및 개별 카드 아이템 컴포넌트
+
+## 3. src/hooks/
+- API 호출이나 복잡한 상태 로직을 분리한 커스텀 훅
+- 예: 인증 로직(useAuth), 행성 데이터 처리(usePlanetData)
+
+## 4. src/pages/
+- 라우팅되는 주요 페이지 단위 컴포넌트
+- 메인(소개), 행성 조회, 레포지토리 관리 페이지 등
+
+## 5. src/services/
+- API 호출 로직 및 백엔드 연동 설정
+- Axios 인스턴스 설정 및 API 엔드포인트 관리
+
+## 6. src/store/
+- Zustand를 이용한 전역 상태 관리
+- 유저 정보, 행성 커스터마이징 설정 값 보관
+
+## 7. src/types/
+- TypeScript 인터페이스 및 타입 선언 파일
+- any 타입은 최대한 지양, 엄격한 타입 정의 적용
+
+## 8. src/utils/
+- 날짜 포맷팅, 데이터 계산 등 공통으로 사용하는 헬퍼 함수
+
+## 9. src/styles/
+- Tailwind CSS 전역 설정 및 글로벌 스타일링(index.css) 관리
