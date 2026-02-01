@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Github, Languages, Search, LogOut, Loader2 } from 'lucide-react';
+import { Github, Languages, Search, Loader2 } from 'lucide-react';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { useAuthStore } from '../../store/useAuthStore';
 
@@ -12,7 +12,8 @@ interface HeaderProps {
 const Header = ({ showSearch = false }: HeaderProps) => {
     const navigate = useNavigate();
     const { language, toggleLanguage, t } = useLanguageStore();
-    const { isAuthenticated, login, clearAuth, isLoggingIn, resetLoggingIn } = useAuthStore();
+    const { isAuthenticated, login, isLoggingIn, resetLoggingIn } = useAuthStore();
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         if (!isAuthenticated && isLoggingIn) {
@@ -22,6 +23,17 @@ const Header = ({ showSearch = false }: HeaderProps) => {
             return () => clearTimeout(timer);
         }
     }, [isAuthenticated, isLoggingIn, resetLoggingIn]);
+
+    const handleSearch = () => {
+        if (!searchTerm.trim()) return;
+        navigate('/planet', { state: { username: searchTerm.trim() } });
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
 
     return (
         <header className="fixed top-0 left-0 z-50 flex h-18 w-full items-center justify-between px-10">
@@ -36,10 +48,16 @@ const Header = ({ showSearch = false }: HeaderProps) => {
                 <div className="flex w-[400px] items-center gap-2 rounded-xl bg-white/5 p-1 backdrop-blur-md border border-white/10 mx-4">
                     <input
                         type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         placeholder="Github ID"
                         className="flex-1 bg-transparent px-4 py-1.5 text-sm outline-none text-white"
                     />
-                    <button className="p-2 text-white/50 hover:text-white">
+                    <button
+                        onClick={handleSearch}
+                        className="p-2 text-white/50 hover:text-white"
+                    >
                         <Search size={18} />
                     </button>
                 </div>
@@ -58,11 +76,13 @@ const Header = ({ showSearch = false }: HeaderProps) => {
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={clearAuth}
+                        onClick={() => navigate('/mypage')}
                         className="flex items-center justify-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm font-semibold text-white border border-white/20 hover:bg-white/20 transition-all w-[220px]"
                     >
-                        <LogOut size={16} />
-                        <span>{t('로그아웃', 'Logout')}</span>
+                        {/* <LogOut size={16} /> */}
+                        {/* <span>{t('로그아웃', 'Logout')}</span> */}
+                        {/* 임시로 마이페이지 이동 버튼으로 변경 */}
+                        <span>{t('마이페이지', 'My Page')}</span>
                     </motion.button>
                 ) : (
                     <motion.button

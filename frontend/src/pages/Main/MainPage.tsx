@@ -122,7 +122,8 @@ const MainPage = () => {
     };
 
     const handleSearch = () => {
-        navigate('/planet');
+        if (!githubId.trim()) return;
+        navigate('/planet', { state: { username: githubId } });
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {

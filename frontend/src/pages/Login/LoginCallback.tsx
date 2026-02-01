@@ -12,37 +12,48 @@ const LoginCallback = () => {
     useEffect(() => {
         if (hasCalled.current) return;
 
-        const code = searchParams.get('code');
+        const token = searchParams.get('token');
         const error = searchParams.get('error');
 
-        if (error || !code) {
+        if (error) {
             resetLoggingIn();
             navigate('/');
             return;
         }
 
-        hasCalled.current = true;
-        handleLogin(code);
-    }, [searchParams, navigate, setAuth, resetLoggingIn]);
+        if (token) {
+            hasCalled.current = true;
+            handleTokenLogin(token);
+        }
+    }, [searchParams, navigate, resetLoggingIn]);
 
-    const handleLogin = async (code: string) => {
+    const handleTokenLogin = async (token: string) => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/github`, {
-                method: 'POST',
+            const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+            const response = await fetch(`${BASE_URL}/auth/me`, {
+                method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Authorization': `token ${token}`, // GitHub API requires 'token' prefix usually, but check middleware. Auth router expects raw string in header? 
+                    // auth.py: authorization: str = Header(None). Calls github with it.
+                    // auth.py: headers={"Authorization": authorization}
+                    // github expects "token OAUTH-TOKEN" or "Bearer OAUTH-TOKEN".
+                    // The token we receive is raw access token.
+                    // So we should send "token {token}" or just "{token}" depending on how backend uses it.
+                    // Backend: headers={"Authorization": authorization}. So we should send full string "token {token}" if backend passes it directly.
                 },
-                body: JSON.stringify({ code }),
             });
 
-            if (!response.ok) throw new Error('인증 실패');
+            if (!response.ok) throw new Error('유저 정보 조회 실패');
 
-            const data = await response.json();
-            setAuth(data.user, data.token);
+            const userData = await response.json();
+            // Map GitHub user data to store format if needed, or just use it.
+            // Store expects 'user' object. user.login is used.
+            setAuth(userData, token);
             navigate('/');
         } catch (error) {
+            console.error(error);
             resetLoggingIn();
-            alert('로그인에 실패했습니다. 다시 시도해주세요.');
+            alert('로그인 처리 중 오류가 발생했습니다.');
             navigate('/');
         }
     };

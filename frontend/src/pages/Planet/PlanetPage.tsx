@@ -1,12 +1,43 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
-import { Search, ChevronRight, RotateCcw } from 'lucide-react';
+import { Search, ChevronRight, RotateCcw, Loader2 } from 'lucide-react';
 import Header from '../../components/layout/Header';
 import { useLanguageStore } from '../../store/useLanguageStore';
 
-const RepositoryList = () => {
+interface Repo {
+    name: string;
+    description: string | null;
+    stars: number;
+    language: string | null;
+    updated_at: string;
+}
+
+const RepositoryList = ({ username }: { username?: string }) => {
     const { t } = useLanguageStore();
-    const repos = [1, 2, 3, 4, 5, 6, 7, 8].map(i => `Giterra-Project-v${i}`);
+    const [repos, setRepos] = useState<Repo[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        if (username) {
+            fetchRepos();
+        }
+    }, [username]);
+
+    const fetchRepos = async () => {
+        setIsLoading(true);
+        try {
+            const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+            const res = await fetch(`${BASE_URL}/repos/${username}`);
+            if (!res.ok) throw new Error('Failed to fetch');
+            const data = await res.json();
+            setRepos(data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleDragStart = (e: React.DragEvent, repoName: string) => {
         e.dataTransfer.setData("repoName", repoName);
@@ -20,9 +51,12 @@ const RepositoryList = () => {
             transition={{ type: 'spring', stiffness: 100, damping: 20 }}
             className="absolute left-0 top-0 z-50 h-full w-[500px] bg-black/60 pt-24 backdrop-blur-2xl border-r border-white/10"
         >
-            <div className="px-12">
+            <div className="px-12 h-full flex flex-col">
                 <h2 className="text-3xl font-bold mb-8 text-white">{t('레포지토리 목록', 'Repository List')}</h2>
-                <div className="flex items-center gap-3 rounded-2xl bg-white/10 p-2 border border-white/10 mb-10">
+
+                {username && <p className="text-indigo-400 mb-4 font-semibold">User: {username}</p>}
+
+                <div className="flex items-center gap-3 rounded-2xl bg-white/10 p-2 border border-white/10 mb-6">
                     <input
                         type="text"
                         placeholder={t('에셋 검색', 'search asset')}
@@ -32,22 +66,33 @@ const RepositoryList = () => {
                         <Search size={20} />
                     </button>
                 </div>
-                <div className="flex flex-col gap-4 overflow-y-auto max-h-[calc(100vh-350px)] pr-4 custom-scrollbar">
-                    {repos.map((name, index) => (
-                        <div
-                            key={index}
-                            draggable
-                            onDragStart={(e) => handleDragStart(e, name)}
-                            className="group flex items-center justify-between p-6 rounded-2xl bg-white/5 border border-white/5 hover:border-indigo-500/50 hover:bg-white/10 transition-all cursor-grab active:cursor-grabbing"
-                        >
-                            <div>
-                                <div className="text-lg font-semibold text-white">{name}</div>
-                                <div className="text-sm text-indigo-300 mt-2 opacity-60">Updated: 2 hours ago</div>
+
+                {isLoading ? (
+                    <div className="flex-1 flex items-center justify-center">
+                        <Loader2 className="animate-spin text-white/50" size={32} />
+                    </div>
+                ) : (
+                    <div className="flex flex-col gap-4 overflow-y-auto pr-4 custom-scrollbar pb-10">
+                        {repos.map((repo, index) => (
+                            <div
+                                key={index}
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, repo.name)}
+                                className="group flex items-center justify-between p-6 rounded-2xl bg-white/5 border border-white/5 hover:border-indigo-500/50 hover:bg-white/10 transition-all cursor-grab active:cursor-grabbing"
+                            >
+                                <div className="min-w-0">
+                                    <div className="text-lg font-semibold text-white truncate">{repo.name}</div>
+                                    <div className="text-sm text-indigo-300 mt-2 opacity-60 flex gap-2">
+                                        <span>{repo.language || 'Unknown'}</span>
+                                        <span>•</span>
+                                        <span>⭐ {repo.stars}</span>
+                                    </div>
+                                </div>
+                                <ChevronRight size={20} className="text-gray-500 group-hover:text-white transition-colors flex-shrink-0" />
                             </div>
-                            <ChevronRight size={20} className="text-gray-500 group-hover:text-white transition-colors" />
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </motion.div>
     );
@@ -55,7 +100,11 @@ const RepositoryList = () => {
 
 const PlanetPage = () => {
     const { t } = useLanguageStore();
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const location = useLocation();
+    const username = location.state?.username;
+
+    // 만약 username이 있으면 사이드바를 자동으로 열어줌 (선택사항)
+    const [isSidebarOpen, setIsSidebarOpen] = useState(!!username);
     const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
     const [sectionData, setSectionData] = useState<{ [key: string]: string }>({});
     const [dragOverId, setDragOverId] = useState<string | null>(null);
@@ -172,7 +221,7 @@ const PlanetPage = () => {
             className="relative h-screen w-screen bg-black overflow-hidden perspective-[1500px]"
         >
             <Header showSearch={true} />
-            <AnimatePresence>{isSidebarOpen && <RepositoryList key="repo-list" />}</AnimatePresence>
+            <AnimatePresence>{isSidebarOpen && <RepositoryList username={username} key="repo-list" />}</AnimatePresence>
 
             <main className="relative flex h-full w-full items-center justify-center overflow-hidden">
                 <motion.div

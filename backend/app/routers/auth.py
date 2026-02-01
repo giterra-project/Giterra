@@ -14,7 +14,7 @@ GITHUB_CLIENT_SECRET = settings.GITHUB_CLIENT_SECRET
 FRONTEND_URL = settings.FRONTEND_URL
 
 # 1. GitHub 로그인 (POST /auth/login)
-@router.post("/login")
+@router.get("/login")
 async def github_login():
     return RedirectResponse(
         f"https://github.com/login/oauth/authorize?client_id={GITHUB_CLIENT_ID}&scope=user:email",
@@ -73,10 +73,10 @@ async def github_callback(code: str, db: AsyncSession = Depends(get_session)):
         await db.commit()
         await db.refresh(db_user)
 
-        return RedirectResponse(f"{FRONTEND_URL}/login/success?token={access_token}")
+        return RedirectResponse(f"{FRONTEND_URL}/login/callback?token={access_token}")
 
 # 3. 내 정보 확인 (POST /auth/me) - 명세서의 Method 준수
-@router.post("/me")
+@router.get("/me")
 async def get_my_info(authorization: str = Header(None)):
     if not authorization:
         raise HTTPException(status_code=401, detail="인증 헤더가 없습니다.")
