@@ -1,20 +1,66 @@
-import { Canvas } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
+import { useState } from 'react'
+
+import PlanetExperience, { type ViewMode } from './scenes/PlanetExperience'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AnimatePresence } from 'framer-motion';
+import MainPage from './pages/Main/MainPage';
+import PlanetPage from './pages/Planet/PlanetPage';
+import LoginCallback from './pages/Login/LoginCallback';
+
+const queryClient = new QueryClient();
+
+
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  return (
+    <AnimatePresence>
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<MainPage />} />
+        <Route path="/login/callback" element={<LoginCallback />} />
+        <Route path="/planet" element={<PlanetPage />} />
+      </Routes>
+    </AnimatePresence>
+  );
+};
 
 function App() {
+  const [viewMode, setViewMode] = useState<ViewMode>('overview')
+
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
-      <Canvas>
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} />
-        <mesh>
-          <boxGeometry args={[2, 2, 2]} />
-          <meshStandardMaterial color="orange" />
-        </mesh>
-        <OrbitControls />
-      </Canvas>
+    <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
+      <PlanetExperience viewMode={viewMode} onViewModeChange={setViewMode} />
+
+      {viewMode === 'detail' && (
+        <button
+          type="button"
+          onClick={() => setViewMode('overview')}
+          style={{
+            position: 'absolute',
+            top: 16,
+            left: 16,
+            padding: '10px 12px',
+            borderRadius: 10,
+            border: '1px solid rgba(255,255,255,0.2)',
+            background: 'rgba(0,0,0,0.6)',
+            color: '#fff',
+            cursor: 'pointer',
+            fontSize: 14,
+            lineHeight: 1,
+            backdropFilter: 'blur(8px)',
+          }}
+        >
+          뒤로/축소
+        </button>
+      )}
     </div>
   )
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AnimatedRoutes />
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
 }
 
-export default App
+export default App;
