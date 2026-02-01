@@ -161,7 +161,7 @@ const MainPage = () => {
                 >
                     <div
                         className="absolute inset-0 flex flex-col items-center justify-center backface-hidden"
-                        style={{ transform: `rotateY(0deg) translateZ(${RADIUS}px)` }}
+                        style={{ transform: `rotateY(0deg) translateZ(${RADIUS}px) scale(0.8)` }}
                     >
                         <div className="text-center select-none">
                             <h1 className="text-7xl font-extrabold pt-18 drop-shadow-2xl text-white">Giterra</h1>
@@ -193,7 +193,7 @@ const MainPage = () => {
 
                     <div
                         className="absolute inset-0 flex items-center justify-center backface-hidden"
-                        style={{ transform: `rotateY(180deg) translateZ(${RADIUS}px)` }}
+                        style={{ transform: `rotateY(180deg) translateZ(${RADIUS}px) scale(0.8)` }}
                     >
                         <div className="flex w-full max-w-6xl items-center justify-between px-20 select-none">
                             <div className="h-96 w-[45%] rounded-[40px] bg-gradient-to-br from-indigo-600/40 to-purple-700/40 border border-white/10 shadow-3xl shadow-indigo-500/10 backdrop-blur-md" />
