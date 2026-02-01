@@ -4,17 +4,19 @@ export type PlanetTheme = 'FUTURE_CITY' | 'LAB_DOME' | 'PRIMITIVE_FOREST' | 'STA
 
 export interface User {
     id: string;
-    githubId: string;
-    name: string;
-    avatarUrl: string;
+    login: string;
+    avatar_url: string;
 }
 
 export interface AuthState {
     user: User | null;
     accessToken: string | null;
     isAuthenticated: boolean;
+    isLoggingIn: boolean;
+    login: () => void;
     setAuth: (user: User, token: string) => void;
     clearAuth: () => void;
+    resetLoggingIn: () => void;
 }
 
 export interface PlanetConfig {

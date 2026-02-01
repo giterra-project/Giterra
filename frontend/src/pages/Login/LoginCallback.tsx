@@ -1,36 +1,58 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
-import { api } from '../../services/api';
-import type { User } from '../../types/store';
 
 const LoginCallback = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const setAuth = useAuthStore((state) => state.setAuth);
+    const { setAuth, resetLoggingIn } = useAuthStore();
+    const hasCalled = useRef(false);
 
     useEffect(() => {
-        const token = searchParams.get('token');
+        if (hasCalled.current) return;
 
-        if (token) {
-            api.get<User>('/api/v1/user/me', {
-                headers: { Authorization: `Bearer ${token}` }
-            })
-                .then((res) => {
-                    setAuth(res.data, token);
-                    navigate('/planet');
-                })
-                .catch(() => {
-                    navigate('/');
-                });
-        } else {
+        const code = searchParams.get('code');
+        const error = searchParams.get('error');
+
+        if (error || !code) {
+            resetLoggingIn();
+            navigate('/');
+            return;
+        }
+
+        hasCalled.current = true;
+        handleLogin(code);
+    }, [searchParams, navigate, setAuth, resetLoggingIn]);
+
+    const handleLogin = async (code: string) => {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/github`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ code }),
+            });
+
+            if (!response.ok) throw new Error('인증 실패');
+
+            const data = await response.json();
+            setAuth(data.user, data.token);
+            navigate('/');
+        } catch (error) {
+            resetLoggingIn();
+            alert('로그인에 실패했습니다. 다시 시도해주세요.');
             navigate('/');
         }
-    }, [searchParams, setAuth, navigate]);
+    };
 
     return (
-        <div className="h-screen w-screen bg-black flex items-center justify-center">
-            <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin" />
+        <div className="flex h-screen w-screen flex-col items-center justify-center bg-black text-white">
+            <Loader2 className="h-12 w-12 animate-spin text-white/40" />
+            <p className="mt-6 text-xl font-medium tracking-tight text-white/60">
+                Giterra 연결 중...
+            </p>
         </div>
     );
 };
