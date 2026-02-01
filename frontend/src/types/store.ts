@@ -2,10 +2,34 @@ export type Language = 'KO' | 'EN';
 
 export type PlanetTheme = 'FUTURE_CITY' | 'LAB_DOME' | 'PRIMITIVE_FOREST' | 'START_TREE';
 
+export interface RepoDetail {
+    name: string;
+    description?: string;
+    language?: string;
+    stars: number;
+    updated_at?: string;
+    building_type?: string;
+    analysis_type?: string;
+    analysis_summary?: string;
+    analysis_sub1?: string;
+    analysis_sub2?: string;
+    analysis_sub3?: string;
+    last_analyzed?: string;
+}
+
+export interface PlanetData {
+    username: string;
+    persona: string;
+    theme: string;
+    total_score: number;
+    overall_analysis?: string;
+    repositories: RepoDetail[];
+}
+
 export interface User {
-    id: string;
     login: string;
     avatar_url: string;
+    name: string;
     html_url?: string;
 }
 

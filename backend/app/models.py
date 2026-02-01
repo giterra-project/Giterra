@@ -47,3 +47,16 @@ class Placement(SQLModel, table=True):
     # 관계 설정
     user: User = Relationship(back_populates="placements")
     repository: Repository = Relationship(back_populates="placement")
+
+class UserProfile(SQLModel, table=True):
+    __tablename__ = "user_profiles"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="users.id", unique=True, index=True)
+
+    persona: Optional[str] = None
+    theme: Optional[str] = None
+    total_score: Optional[float] = None
+    overall_analysis: Optional[str] = None
+
+    last_analyzed: Optional[datetime] = Field(default_factory=datetime.now)
