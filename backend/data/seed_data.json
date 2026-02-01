@@ -1,0 +1,1470 @@
+{
+  "users": [
+    {
+      "github_id": "80721245",
+      "username": "jih19984",
+      "avatar_url": "https://github.com/jih19984.png",
+      "html_url": null
+    },
+    {
+      "github_id": "12345678",
+      "username": "winter3671",
+      "avatar_url": "https://github.com/winter3671.png",
+      "html_url": null
+    },
+    {
+      "github_id": "named_tiangolo",
+      "username": "tiangolo",
+      "avatar_url": "https://github.com/tiangolo.png",
+      "html_url": "https://github.com/tiangolo"
+    },
+    {
+      "github_id": "named_yyx990803",
+      "username": "yyx990803",
+      "avatar_url": "https://github.com/yyx990803.png",
+      "html_url": "https://github.com/yyx990803"
+    },
+    {
+      "github_id": "named_antfu",
+      "username": "antfu",
+      "avatar_url": "https://github.com/antfu.png",
+      "html_url": "https://github.com/antfu"
+    },
+    {
+      "github_id": "named_sindresorhus",
+      "username": "sindresorhus",
+      "avatar_url": "https://github.com/sindresorhus.png",
+      "html_url": "https://github.com/sindresorhus"
+    },
+    {
+      "github_id": "named_karpathy",
+      "username": "karpathy",
+      "avatar_url": "https://github.com/karpathy.png",
+      "html_url": "https://github.com/karpathy"
+    },
+    {
+      "github_id": "named_tj",
+      "username": "tj",
+      "avatar_url": "https://github.com/tj.png",
+      "html_url": "https://github.com/tj"
+    },
+    {
+      "github_id": "named_gaearon",
+      "username": "gaearon",
+      "avatar_url": "https://github.com/gaearon.png",
+      "html_url": "https://github.com/gaearon"
+    },
+    {
+      "github_id": "named_defunkt",
+      "username": "defunkt",
+      "avatar_url": "https://github.com/defunkt.png",
+      "html_url": "https://github.com/defunkt"
+    },
+    {
+      "github_id": "named_mojombo",
+      "username": "mojombo",
+      "avatar_url": "https://github.com/mojombo.png",
+      "html_url": "https://github.com/mojombo"
+    },
+    {
+      "github_id": "named_kennethreitz",
+      "username": "kennethreitz",
+      "avatar_url": "https://github.com/kennethreitz.png",
+      "html_url": "https://github.com/kennethreitz"
+    },
+    {
+      "github_id": "named_jwasham",
+      "username": "jwasham",
+      "avatar_url": "https://github.com/jwasham.png",
+      "html_url": "https://github.com/jwasham"
+    },
+    {
+      "github_id": "named_donnemartin",
+      "username": "donnemartin",
+      "avatar_url": "https://github.com/donnemartin.png",
+      "html_url": "https://github.com/donnemartin"
+    },
+    {
+      "github_id": "named_kamranahmedse",
+      "username": "kamranahmedse",
+      "avatar_url": "https://github.com/kamranahmedse.png",
+      "html_url": "https://github.com/kamranahmedse"
+    },
+    {
+      "github_id": "named_jojoldu",
+      "username": "jojoldu",
+      "avatar_url": "https://github.com/jojoldu.png",
+      "html_url": "https://github.com/jojoldu"
+    },
+    {
+      "github_id": "named_woowacourse",
+      "username": "woowacourse",
+      "avatar_url": "https://github.com/woowacourse.png",
+      "html_url": "https://github.com/woowacourse"
+    },
+    {
+      "github_id": "named_godorm",
+      "username": "godorm",
+      "avatar_url": "https://github.com/godorm.png",
+      "html_url": "https://github.com/godorm"
+    },
+    {
+      "github_id": "named_velopert",
+      "username": "velopert",
+      "avatar_url": "https://github.com/velopert.png",
+      "html_url": "https://github.com/velopert"
+    },
+    {
+      "github_id": "named_captain-pangyo",
+      "username": "captain-pangyo",
+      "avatar_url": "https://github.com/captain-pangyo.png",
+      "html_url": "https://github.com/captain-pangyo"
+    },
+    {
+      "github_id": "named_jeonghwan-kim",
+      "username": "jeonghwan-kim",
+      "avatar_url": "https://github.com/jeonghwan-kim.png",
+      "html_url": "https://github.com/jeonghwan-kim"
+    },
+    {
+      "github_id": "named_leebyeongmin",
+      "username": "leebyeongmin",
+      "avatar_url": "https://github.com/leebyeongmin.png",
+      "html_url": "https://github.com/leebyeongmin"
+    },
+    {
+      "github_id": "named_clean-code-javascript-kr",
+      "username": "clean-code-javascript-kr",
+      "avatar_url": "https://github.com/clean-code-javascript-kr.png",
+      "html_url": "https://github.com/clean-code-javascript-kr"
+    },
+    {
+      "github_id": "named_kentcdodds",
+      "username": "kentcdodds",
+      "avatar_url": "https://github.com/kentcdodds.png",
+      "html_url": "https://github.com/kentcdodds"
+    },
+    {
+      "github_id": "named_TestingLibrary",
+      "username": "TestingLibrary",
+      "avatar_url": "https://github.com/TestingLibrary.png",
+      "html_url": "https://github.com/TestingLibrary"
+    },
+    {
+      "github_id": "named_TDD-Kyu",
+      "username": "TDD-Kyu",
+      "avatar_url": "https://github.com/TDD-Kyu.png",
+      "html_url": "https://github.com/TDD-Kyu"
+    },
+    {
+      "github_id": "named_aelassas",
+      "username": "aelassas",
+      "avatar_url": "https://github.com/aelassas.png",
+      "html_url": "https://github.com/aelassas"
+    },
+    {
+      "github_id": "named_dwyl",
+      "username": "dwyl",
+      "avatar_url": "https://github.com/dwyl.png",
+      "html_url": "https://github.com/dwyl"
+    }
+  ],
+  "repositories": [
+    {
+      "user_username": "jih19984",
+      "name": "TIL_Summary",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 10, Langs: ['Python']",
+      "latest_commit": "2025-10-09T13:11:16",
+      "last_analyzed": "2026-01-28T01:10:18.055247"
+    },
+    {
+      "user_username": "winter3671",
+      "name": "TakeMeTrip",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Vue', 'Python', 'JavaScript', 'HTML']",
+      "latest_commit": "2026-01-07T16:44:20",
+      "last_analyzed": "2026-01-28T20:52:12.024276"
+    },
+    {
+      "user_username": "tj",
+      "name": "commander.js",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'TypeScript']",
+      "latest_commit": "2025-10-25T12:04:15",
+      "last_analyzed": "2026-01-28T21:03:05.666911"
+    },
+    {
+      "user_username": "tj",
+      "name": "n",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Shell', 'Makefile']",
+      "latest_commit": "2025-05-21T03:43:28",
+      "last_analyzed": "2026-01-28T21:03:05.670911"
+    },
+    {
+      "user_username": "tj",
+      "name": "git-extras",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Shell', 'Python', 'Batchfile', 'Makefile']",
+      "latest_commit": "2026-01-20T06:11:45",
+      "last_analyzed": "2026-01-28T21:03:05.674002"
+    },
+    {
+      "user_username": "tj",
+      "name": "co",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript']",
+      "latest_commit": "2016-10-17T04:06:25",
+      "last_analyzed": "2026-01-28T21:03:05.676994"
+    },
+    {
+      "user_username": "tj",
+      "name": "ejs",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'Makefile']",
+      "latest_commit": "2015-01-04T07:25:43",
+      "last_analyzed": "2026-01-28T21:03:05.680998"
+    },
+    {
+      "user_username": "tj",
+      "name": "node-prune",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Go']",
+      "latest_commit": "2020-05-12T09:34:09",
+      "last_analyzed": "2026-01-28T21:03:05.683994"
+    },
+    {
+      "user_username": "tj",
+      "name": "consolidate.js",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'Makefile']",
+      "latest_commit": "2022-03-14T23:06:40",
+      "last_analyzed": "2026-01-28T21:03:05.687995"
+    },
+    {
+      "user_username": "tj",
+      "name": "frontend-boilerplate",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'CSS', 'HTML']",
+      "latest_commit": "2018-05-14T17:33:49",
+      "last_analyzed": "2026-01-28T21:03:05.690995"
+    },
+    {
+      "user_username": "gaearon",
+      "name": "react-hot-loader",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'Shell']",
+      "latest_commit": "2022-11-13T04:20:12",
+      "last_analyzed": "2026-01-28T21:03:08.821108"
+    },
+    {
+      "user_username": "gaearon",
+      "name": "overreacted.io",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'JavaScript', 'CSS']",
+      "latest_commit": "2026-01-25T20:54:12",
+      "last_analyzed": "2026-01-28T21:03:08.825109"
+    },
+    {
+      "user_username": "gaearon",
+      "name": "react-hot-boilerplate",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'HTML']",
+      "latest_commit": "2020-08-21T15:47:31",
+      "last_analyzed": "2026-01-28T21:03:08.828108"
+    },
+    {
+      "user_username": "gaearon",
+      "name": "react-transform-boilerplate",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'HTML']",
+      "latest_commit": "2020-08-21T15:47:57",
+      "last_analyzed": "2026-01-28T21:03:08.839754"
+    },
+    {
+      "user_username": "gaearon",
+      "name": "whatthefuck.is",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 32, Langs: ['CSS', 'JavaScript']",
+      "latest_commit": "2020-08-14T22:41:50",
+      "last_analyzed": "2026-01-28T21:03:08.842753"
+    },
+    {
+      "user_username": "gaearon",
+      "name": "react-makes-you-sad",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 41, Langs: ['Makefile']",
+      "latest_commit": "2016-04-03T00:16:04",
+      "last_analyzed": "2026-01-28T21:03:08.846819"
+    },
+    {
+      "user_username": "gaearon",
+      "name": "react-document-title",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript']",
+      "latest_commit": "2018-01-04T15:33:29",
+      "last_analyzed": "2026-01-28T21:03:08.851823"
+    },
+    {
+      "user_username": "gaearon",
+      "name": "flux-react-router-example",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'HTML']",
+      "latest_commit": "2015-10-03T10:29:59",
+      "last_analyzed": "2026-01-28T21:03:08.855358"
+    },
+    {
+      "user_username": "defunkt",
+      "name": "jquery-pjax",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'HTML', 'Ruby', 'Shell']",
+      "latest_commit": "2017-05-23T11:23:11",
+      "last_analyzed": "2026-01-28T21:03:12.144998"
+    },
+    {
+      "user_username": "defunkt",
+      "name": "gist",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Ruby', 'Roff']",
+      "latest_commit": "2022-05-30T17:31:13",
+      "last_analyzed": "2026-01-28T21:03:12.147998"
+    },
+    {
+      "user_username": "defunkt",
+      "name": "dotjs",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Ruby', 'JavaScript']",
+      "latest_commit": "2018-07-26T16:09:12",
+      "last_analyzed": "2026-01-28T21:03:12.151999"
+    },
+    {
+      "user_username": "defunkt",
+      "name": "facebox",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript']",
+      "latest_commit": "2013-07-15T19:55:04",
+      "last_analyzed": "2026-01-28T21:03:12.155605"
+    },
+    {
+      "user_username": "sindresorhus",
+      "name": "awesome",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: []",
+      "latest_commit": "2026-01-15T13:32:01",
+      "last_analyzed": "2026-01-28T21:24:17.525578"
+    },
+    {
+      "user_username": "sindresorhus",
+      "name": "awesome-nodejs",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: []",
+      "latest_commit": "2026-01-14T09:40:35",
+      "last_analyzed": "2026-01-28T21:24:17.528578"
+    },
+    {
+      "user_username": "sindresorhus",
+      "name": "awesome-electron",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: []",
+      "latest_commit": "2026-01-14T17:00:42",
+      "last_analyzed": "2026-01-28T21:24:17.530579"
+    },
+    {
+      "user_username": "sindresorhus",
+      "name": "quick-look-plugins",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: []",
+      "latest_commit": "2026-01-28T06:21:04",
+      "last_analyzed": "2026-01-28T21:24:17.533581"
+    },
+    {
+      "user_username": "sindresorhus",
+      "name": "type-fest",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'JavaScript']",
+      "latest_commit": "2026-01-27T14:16:15",
+      "last_analyzed": "2026-01-28T21:24:17.536579"
+    },
+    {
+      "user_username": "sindresorhus",
+      "name": "ky",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript']",
+      "latest_commit": "2026-01-25T17:29:42",
+      "last_analyzed": "2026-01-28T21:24:17.539580"
+    },
+    {
+      "user_username": "sindresorhus",
+      "name": "got",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript']",
+      "latest_commit": "2025-12-30T12:01:43",
+      "last_analyzed": "2026-01-28T21:24:17.541579"
+    },
+    {
+      "user_username": "karpathy",
+      "name": "nanoGPT",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Python']",
+      "latest_commit": "2025-11-12T19:52:34",
+      "last_analyzed": "2026-01-28T21:24:19.975920"
+    },
+    {
+      "user_username": "yyx990803",
+      "name": "build-your-own-mint",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 20, Langs: ['HTML', 'JavaScript', 'CSS']",
+      "latest_commit": "2019-01-23T01:58:02",
+      "last_analyzed": "2026-01-28T21:24:31.993887"
+    },
+    {
+      "user_username": "yyx990803",
+      "name": "vue-hooks",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 28, Langs: ['JavaScript', 'HTML']",
+      "latest_commit": "2020-04-29T19:59:15",
+      "last_analyzed": "2026-01-28T21:24:31.996887"
+    },
+    {
+      "user_username": "yyx990803",
+      "name": "pod",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'Shell', 'HTML', 'CSS']",
+      "latest_commit": "2017-05-14T13:51:37",
+      "last_analyzed": "2026-01-28T21:24:32.000001"
+    },
+    {
+      "user_username": "yyx990803",
+      "name": "zoomerang",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'HTML']",
+      "latest_commit": "2016-04-02T05:06:44",
+      "last_analyzed": "2026-01-28T21:24:32.001941"
+    },
+    {
+      "user_username": "yyx990803",
+      "name": "vue-lit",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 6, Langs: ['JavaScript', 'HTML']",
+      "latest_commit": "2020-10-27T03:43:05",
+      "last_analyzed": "2026-01-28T21:24:32.004984"
+    },
+    {
+      "user_username": "yyx990803",
+      "name": "HTML5-Clear-v2",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'Less', 'Shell', 'HTML']",
+      "latest_commit": "2023-04-26T09:32:23",
+      "last_analyzed": "2026-01-28T21:24:32.007981"
+    },
+    {
+      "user_username": "yyx990803",
+      "name": "vite-vs-next-turbo-hmr",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 9, Langs: ['JavaScript', 'CSS', 'HTML']",
+      "latest_commit": "2022-11-02T22:37:35",
+      "last_analyzed": "2026-01-28T21:24:32.010980"
+    },
+    {
+      "user_username": "antfu",
+      "name": "eslint-config",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'TypeScript', 'Vue', 'HTML', 'Astro', 'CSS', 'Svelte']",
+      "latest_commit": "2026-01-21T08:23:57",
+      "last_analyzed": "2026-01-28T21:24:14.609981"
+    },
+    {
+      "user_username": "antfu",
+      "name": "vscode-file-nesting-config",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'TypeScript']",
+      "latest_commit": "2026-01-19T07:55:39",
+      "last_analyzed": "2026-01-28T21:24:14.616516"
+    },
+    {
+      "user_username": "antfu",
+      "name": "node-modules-inspector",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Vue', 'TypeScript', 'JavaScript', 'CSS']",
+      "latest_commit": "2025-10-26T08:07:09",
+      "last_analyzed": "2026-01-28T21:24:14.619516"
+    },
+    {
+      "user_username": "antfu",
+      "name": "vscode-settings",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 21, Langs: []",
+      "latest_commit": "2025-05-28T23:40:52",
+      "last_analyzed": "2026-01-28T21:24:14.622558"
+    },
+    {
+      "user_username": "antfu",
+      "name": "vue-starport",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'Vue', 'JavaScript', 'HTML', 'CSS']",
+      "latest_commit": "2023-09-14T07:46:44",
+      "last_analyzed": "2026-01-28T21:24:14.625557"
+    },
+    {
+      "user_username": "antfu",
+      "name": "vitesse-nuxt",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'Vue', 'Dockerfile', 'JavaScript']",
+      "latest_commit": "2026-01-06T06:38:57",
+      "last_analyzed": "2026-01-28T21:24:14.627557"
+    },
+    {
+      "user_username": "antfu",
+      "name": "esno",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'JavaScript']",
+      "latest_commit": "2024-09-29T00:24:17",
+      "last_analyzed": "2026-01-28T21:24:14.631510"
+    },
+    {
+      "user_username": "sindresorhus",
+      "name": "pure",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Shell']",
+      "latest_commit": "2025-11-15T09:16:07",
+      "last_analyzed": "2026-01-28T21:24:17.544579"
+    },
+    {
+      "user_username": "karpathy",
+      "name": "nanochat",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Jupyter Notebook', 'Shell', 'HTML']",
+      "latest_commit": "2026-01-27T22:33:16",
+      "last_analyzed": "2026-01-28T21:24:19.978920"
+    },
+    {
+      "user_username": "karpathy",
+      "name": "LLM101n",
+      "analysis_type": "Normal",
+      "analysis_summary": "Commits: 3, Langs: []",
+      "latest_commit": "2024-08-01T01:20:33",
+      "last_analyzed": "2026-01-28T21:24:19.980950"
+    },
+    {
+      "user_username": "karpathy",
+      "name": "llm.c",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Cuda', 'Python', 'C', 'C++', 'Shell', 'Makefile', 'Jupyter Notebook']",
+      "latest_commit": "2025-05-10T23:24:10",
+      "last_analyzed": "2026-01-28T21:24:19.982957"
+    },
+    {
+      "user_username": "karpathy",
+      "name": "minGPT",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Jupyter Notebook']",
+      "latest_commit": "2023-01-08T16:50:20",
+      "last_analyzed": "2026-01-28T21:24:19.985923"
+    },
+    {
+      "user_username": "karpathy",
+      "name": "nn-zero-to-hero",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 12, Langs: ['Jupyter Notebook']",
+      "latest_commit": "2024-02-20T17:19:51",
+      "last_analyzed": "2026-01-28T21:24:19.988921"
+    },
+    {
+      "user_username": "karpathy",
+      "name": "llama2.c",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['C', 'Python', 'Jupyter Notebook', 'Makefile', 'Batchfile']",
+      "latest_commit": "2024-05-29T17:01:04",
+      "last_analyzed": "2026-01-28T21:24:19.991952"
+    },
+    {
+      "user_username": "karpathy",
+      "name": "micrograd",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 24, Langs: ['Jupyter Notebook', 'Python']",
+      "latest_commit": "2020-04-18T19:15:25",
+      "last_analyzed": "2026-01-28T21:24:19.993950"
+    },
+    {
+      "user_username": "yyx990803",
+      "name": "laravel-vue-cli-3",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 11, Langs: ['PHP', 'Vue', 'HTML']",
+      "latest_commit": "2018-08-13T16:16:28",
+      "last_analyzed": "2026-01-28T21:24:32.013980"
+    },
+    {
+      "user_username": "defunkt",
+      "name": "unicorn",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Ruby', 'Perl', 'Ragel', 'Shell', 'C', 'Makefile']",
+      "latest_commit": "2025-04-09T06:20:05",
+      "last_analyzed": "2026-01-28T21:03:12.159116"
+    },
+    {
+      "user_username": "defunkt",
+      "name": "pystache",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Python']",
+      "latest_commit": "2014-09-30T08:28:08",
+      "last_analyzed": "2026-01-28T21:03:12.164116"
+    },
+    {
+      "user_username": "defunkt",
+      "name": "github-gem",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Ruby']",
+      "latest_commit": "2012-04-15T16:18:24",
+      "last_analyzed": "2026-01-28T21:03:12.167120"
+    },
+    {
+      "user_username": "defunkt",
+      "name": "cijoe",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Ruby', 'Shell', 'JavaScript']",
+      "latest_commit": "2011-06-22T22:44:40",
+      "last_analyzed": "2026-01-28T21:03:12.171167"
+    },
+    {
+      "user_username": "mojombo",
+      "name": "chronic",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Ruby']",
+      "latest_commit": "2023-01-30T03:51:21",
+      "last_analyzed": "2026-01-28T21:03:14.553341"
+    },
+    {
+      "user_username": "mojombo",
+      "name": "god",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Ruby', 'C', 'CSS', 'JavaScript', 'HTML', 'Shell']",
+      "latest_commit": "2016-02-10T17:40:31",
+      "last_analyzed": "2026-01-28T21:03:14.556338"
+    },
+    {
+      "user_username": "mojombo",
+      "name": "grit",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Ruby']",
+      "latest_commit": "2014-02-03T19:24:07",
+      "last_analyzed": "2026-01-28T21:03:14.559338"
+    },
+    {
+      "user_username": "mojombo",
+      "name": "mojombo.github.io",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['HTML', 'CSS', 'Ruby']",
+      "latest_commit": "2019-03-20T16:59:43",
+      "last_analyzed": "2026-01-28T21:03:14.562340"
+    },
+    {
+      "user_username": "mojombo",
+      "name": "clippy",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 2, Langs: []",
+      "latest_commit": "2009-02-13T19:02:31",
+      "last_analyzed": "2026-01-28T21:03:14.565338"
+    },
+    {
+      "user_username": "mojombo",
+      "name": "tpw",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: []",
+      "latest_commit": "2011-11-22T21:23:33",
+      "last_analyzed": "2026-01-28T21:03:14.569905"
+    },
+    {
+      "user_username": "mojombo",
+      "name": "proxymachine",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Ruby']",
+      "latest_commit": "2011-02-02T01:41:04",
+      "last_analyzed": "2026-01-28T21:03:14.572904"
+    },
+    {
+      "user_username": "mojombo",
+      "name": "ernie",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Erlang', 'Ruby']",
+      "latest_commit": "2011-12-07T08:32:15",
+      "last_analyzed": "2026-01-28T21:03:14.575907"
+    },
+    {
+      "user_username": "kennethreitz",
+      "name": "records",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Makefile']",
+      "latest_commit": "2024-07-09T11:26:42",
+      "last_analyzed": "2026-01-28T21:03:17.565377"
+    },
+    {
+      "user_username": "kennethreitz",
+      "name": "responder",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'HTML']",
+      "latest_commit": "2025-02-02T23:43:10",
+      "last_analyzed": "2026-01-28T21:03:17.568487"
+    },
+    {
+      "user_username": "kennethreitz",
+      "name": "maya",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Jupyter Notebook']",
+      "latest_commit": "2024-07-19T13:04:30",
+      "last_analyzed": "2026-01-28T21:03:17.572004"
+    },
+    {
+      "user_username": "kennethreitz",
+      "name": "pytheory",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Python']",
+      "latest_commit": "2024-11-17T11:28:04",
+      "last_analyzed": "2026-01-28T21:03:17.576003"
+    },
+    {
+      "user_username": "kennethreitz",
+      "name": "requests3",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Makefile', 'Dockerfile']",
+      "latest_commit": "2019-09-23T19:05:32",
+      "last_analyzed": "2026-01-28T21:03:17.579001"
+    },
+    {
+      "user_username": "kennethreitz",
+      "name": "bake",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Perl', 'Shell', 'Dockerfile']",
+      "latest_commit": "2024-03-30T15:13:03",
+      "last_analyzed": "2026-01-28T21:03:17.582001"
+    },
+    {
+      "user_username": "kennethreitz",
+      "name": "simplemind",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Dockerfile']",
+      "latest_commit": "2025-02-09T00:14:30",
+      "last_analyzed": "2026-01-28T21:03:17.585373"
+    },
+    {
+      "user_username": "kennethreitz",
+      "name": "pep8.org",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['HTML', 'CSS', 'JavaScript', 'Shell']",
+      "latest_commit": "2019-08-20T15:54:48",
+      "last_analyzed": "2026-01-28T21:03:17.589363"
+    },
+    {
+      "user_username": "jwasham",
+      "name": "coding-interview-university",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: []",
+      "latest_commit": "2024-12-05T23:46:51",
+      "last_analyzed": "2026-01-28T21:24:34.847017"
+    },
+    {
+      "user_username": "jwasham",
+      "name": "computer-science-flash-cards",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['HTML', 'Python', 'JavaScript', 'CSS', 'Dockerfile', 'Shell']",
+      "latest_commit": "2024-09-04T01:55:06",
+      "last_analyzed": "2026-01-28T21:24:34.849886"
+    },
+    {
+      "user_username": "donnemartin",
+      "name": "system-design-primer",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Shell']",
+      "latest_commit": "2025-11-03T12:06:22",
+      "last_analyzed": "2026-01-28T21:24:37.092432"
+    },
+    {
+      "user_username": "donnemartin",
+      "name": "interactive-coding-challenges",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'C++']",
+      "latest_commit": "2020-08-05T00:56:10",
+      "last_analyzed": "2026-01-28T21:24:37.095429"
+    },
+    {
+      "user_username": "donnemartin",
+      "name": "data-science-ipython-notebooks",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'CSS', 'Makefile', 'Dockerfile']",
+      "latest_commit": "2019-02-11T10:51:45",
+      "last_analyzed": "2026-01-28T21:24:37.097430"
+    },
+    {
+      "user_username": "donnemartin",
+      "name": "awesome-aws",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Shell']",
+      "latest_commit": "2023-05-28T18:27:36",
+      "last_analyzed": "2026-01-28T21:24:37.101432"
+    },
+    {
+      "user_username": "donnemartin",
+      "name": "gitsome",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'HTML', 'Visual Basic', 'Shell', 'Dockerfile', 'Makefile', 'Batchfile', 'C']",
+      "latest_commit": "2019-05-18T02:29:41",
+      "last_analyzed": "2026-01-28T21:24:37.104444"
+    },
+    {
+      "user_username": "donnemartin",
+      "name": "dev-setup",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Shell', 'Vim Script', 'JavaScript', 'CSS', 'GDB']",
+      "latest_commit": "2019-04-13T15:53:03",
+      "last_analyzed": "2026-01-28T21:24:37.107992"
+    },
+    {
+      "user_username": "kamranahmedse",
+      "name": "developer-roadmap",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'Astro', 'JavaScript', 'CSS', 'Shell']",
+      "latest_commit": "2026-01-27T13:52:04",
+      "last_analyzed": "2026-01-28T21:24:40.086655"
+    },
+    {
+      "user_username": "kamranahmedse",
+      "name": "design-patterns-for-humans",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: []",
+      "latest_commit": "2024-12-02T04:54:47",
+      "last_analyzed": "2026-01-28T21:24:40.088655"
+    },
+    {
+      "user_username": "kamranahmedse",
+      "name": "driver.js",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'HTML', 'CSS']",
+      "latest_commit": "2025-11-18T22:21:52",
+      "last_analyzed": "2026-01-28T21:24:40.091655"
+    },
+    {
+      "user_username": "kamranahmedse",
+      "name": "git-standup",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Shell', 'Makefile']",
+      "latest_commit": "2025-07-07T22:48:42",
+      "last_analyzed": "2026-01-28T21:24:40.093655"
+    },
+    {
+      "user_username": "kamranahmedse",
+      "name": "pennywise",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'SCSS', 'HTML', 'CSS']",
+      "latest_commit": "2025-12-22T08:55:32",
+      "last_analyzed": "2026-01-28T21:24:40.097465"
+    },
+    {
+      "user_username": "kamranahmedse",
+      "name": "githunt",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'CSS', 'HTML']",
+      "latest_commit": "2024-03-25T11:51:35",
+      "last_analyzed": "2026-01-28T21:24:40.099464"
+    },
+    {
+      "user_username": "kamranahmedse",
+      "name": "jquery-toast-plugin",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript']",
+      "latest_commit": "2017-11-20T07:54:29",
+      "last_analyzed": "2026-01-28T21:24:40.102464"
+    },
+    {
+      "user_username": "kamranahmedse",
+      "name": "brusher",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript']",
+      "latest_commit": "2020-03-04T08:30:02",
+      "last_analyzed": "2026-01-28T21:24:40.105461"
+    },
+    {
+      "user_username": "jojoldu",
+      "name": "junior-recruit-scheduler",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript']",
+      "latest_commit": "2023-05-09T13:38:26",
+      "last_analyzed": "2026-01-28T21:24:27.360276"
+    },
+    {
+      "user_username": "jojoldu",
+      "name": "spring-batch-in-action",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Java']",
+      "latest_commit": "2023-10-02T14:17:06",
+      "last_analyzed": "2026-01-28T21:24:27.368275"
+    },
+    {
+      "user_username": "tiangolo",
+      "name": "uwsgi-nginx-flask-docker",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Dockerfile', 'Shell', 'HTML']",
+      "latest_commit": "2025-11-25T16:18:12",
+      "last_analyzed": "2026-01-28T21:24:29.821020"
+    },
+    {
+      "user_username": "tiangolo",
+      "name": "uvicorn-gunicorn-fastapi-docker",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Dockerfile']",
+      "latest_commit": "2025-12-31T09:04:42",
+      "last_analyzed": "2026-01-28T21:24:29.824018"
+    },
+    {
+      "user_username": "tiangolo",
+      "name": "pydantic-sqlalchemy",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Shell']",
+      "latest_commit": "2025-11-25T16:16:47",
+      "last_analyzed": "2026-01-28T21:24:29.827019"
+    },
+    {
+      "user_username": "tiangolo",
+      "name": "nginx-rtmp-docker",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Dockerfile']",
+      "latest_commit": "2025-12-31T09:08:01",
+      "last_analyzed": "2026-01-28T21:24:29.829018"
+    },
+    {
+      "user_username": "tiangolo",
+      "name": "dockerswarm.rocks",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Shell']",
+      "latest_commit": "2025-12-31T09:05:09",
+      "last_analyzed": "2026-01-28T21:24:29.831572"
+    },
+    {
+      "user_username": "tiangolo",
+      "name": "uwsgi-nginx-docker",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Shell', 'Dockerfile']",
+      "latest_commit": "2026-01-18T11:29:51",
+      "last_analyzed": "2026-01-28T21:24:29.834571"
+    },
+    {
+      "user_username": "jwasham",
+      "name": "practice-python",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Jupyter Notebook']",
+      "latest_commit": "2021-07-11T18:19:55",
+      "last_analyzed": "2026-01-28T21:24:34.852841"
+    },
+    {
+      "user_username": "jwasham",
+      "name": "code-catalog-python",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 23, Langs: ['Python']",
+      "latest_commit": "2019-01-19T20:43:15",
+      "last_analyzed": "2026-01-28T21:24:34.855349"
+    },
+    {
+      "user_username": "jwasham",
+      "name": "practice-c",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['C', 'CMake', 'Assembly', 'Shell']",
+      "latest_commit": "2021-08-07T17:33:43",
+      "last_analyzed": "2026-01-28T21:24:34.858897"
+    },
+    {
+      "user_username": "jwasham",
+      "name": "practice-cpp",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['C++', 'Python', 'CMake', 'M4', 'Shell', 'Makefile', 'C', 'Objective-C']",
+      "latest_commit": "2016-10-10T22:35:50",
+      "last_analyzed": "2026-01-28T21:24:34.861896"
+    },
+    {
+      "user_username": "jwasham",
+      "name": "machine-learning-for-software-engineers",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 42, Langs: []",
+      "latest_commit": "2016-10-14T09:28:01",
+      "last_analyzed": "2026-01-28T21:24:34.864896"
+    },
+    {
+      "user_username": "donnemartin",
+      "name": "saws",
+      "analysis_type": "Normal",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Shell', 'Dockerfile']",
+      "latest_commit": "2022-01-15T02:58:14",
+      "last_analyzed": "2026-01-28T21:24:37.110996"
+    },
+    {
+      "user_username": "donnemartin",
+      "name": "haxor-news",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Shell']",
+      "latest_commit": "2022-04-22T02:41:07",
+      "last_analyzed": "2026-01-28T21:24:37.113994"
+    },
+    {
+      "user_username": "tiangolo",
+      "name": "uvicorn-gunicorn-docker",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Dockerfile', 'Shell']",
+      "latest_commit": "2025-11-25T16:16:54",
+      "last_analyzed": "2026-01-28T21:24:29.837571"
+    },
+    {
+      "user_username": "tiangolo",
+      "name": "full-stack",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'TypeScript', 'Vue', 'Shell', 'Dockerfile', 'HTML', 'JavaScript', 'Mako']",
+      "latest_commit": "2022-11-14T16:06:17",
+      "last_analyzed": "2026-01-28T21:24:29.840571"
+    },
+    {
+      "user_username": "jwasham",
+      "name": "awesome-cheatsheet",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Makefile']",
+      "latest_commit": "2016-10-13T05:03:33",
+      "last_analyzed": "2026-01-28T21:24:34.867893"
+    },
+    {
+      "user_username": "woowacourse",
+      "name": "back-end-roadmap",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 23, Langs: ['HTML']",
+      "latest_commit": "2020-07-20T01:01:15",
+      "last_analyzed": "2026-01-28T21:24:43.117551"
+    },
+    {
+      "user_username": "woowacourse",
+      "name": "service-apply",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Kotlin', 'JavaScript', 'TypeScript', 'HTML', 'CSS', 'Shell']",
+      "latest_commit": "2022-10-14T07:40:14",
+      "last_analyzed": "2026-01-28T21:24:43.121019"
+    },
+    {
+      "user_username": "woowacourse",
+      "name": "tecoble",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'JavaScript', 'HTML']",
+      "latest_commit": "2023-12-01T07:09:24",
+      "last_analyzed": "2026-01-28T21:24:43.123020"
+    },
+    {
+      "user_username": "woowacourse",
+      "name": "woowacourse-docs",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 43, Langs: []",
+      "latest_commit": "2025-05-29T03:39:52",
+      "last_analyzed": "2026-01-28T21:24:43.126018"
+    },
+    {
+      "user_username": "antfu",
+      "name": "drauu",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'HTML', 'CSS', 'JavaScript']",
+      "latest_commit": "2026-01-13T06:38:51",
+      "last_analyzed": "2026-01-28T21:24:14.633510"
+    },
+    {
+      "user_username": "velopert",
+      "name": "velog",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'CSS', 'TypeScript', 'HTML', 'PLpgSQL', 'Shell']",
+      "latest_commit": "2020-03-03T15:05:02",
+      "last_analyzed": "2026-01-28T21:24:22.526083"
+    },
+    {
+      "user_username": "velopert",
+      "name": "velog-client",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'JavaScript', 'CSS', 'HTML', 'Shell', 'Dockerfile']",
+      "latest_commit": "2025-12-02T10:21:40",
+      "last_analyzed": "2026-01-28T21:24:22.529083"
+    },
+    {
+      "user_username": "velopert",
+      "name": "learning-react",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'HTML', 'CSS', 'SCSS']",
+      "latest_commit": "2023-04-23T19:52:51",
+      "last_analyzed": "2026-01-28T21:24:22.532083"
+    },
+    {
+      "user_username": "velopert",
+      "name": "velog-server",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'JavaScript', 'Dockerfile', 'Shell']",
+      "latest_commit": "2025-10-30T14:33:26",
+      "last_analyzed": "2026-01-28T21:24:22.534635"
+    },
+    {
+      "user_username": "velopert",
+      "name": "react-tutorial",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 7, Langs: ['JavaScript']",
+      "latest_commit": "2020-06-25T14:51:45",
+      "last_analyzed": "2026-01-28T21:24:22.537631"
+    },
+    {
+      "user_username": "velopert",
+      "name": "velofolio",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'JavaScript', 'HTML', 'CSS']",
+      "latest_commit": "2021-05-01T08:59:39",
+      "last_analyzed": "2026-01-28T21:24:22.540632"
+    },
+    {
+      "user_username": "velopert",
+      "name": "bitimulate",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'CSS', 'HTML']",
+      "latest_commit": "2018-12-23T18:55:56",
+      "last_analyzed": "2026-01-28T21:24:22.542632"
+    },
+    {
+      "user_username": "aelassas",
+      "name": "servy",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['C#', 'PowerShell', 'Inno Setup', 'Python', 'JavaScript', 'VBScript', 'AutoHotkey']",
+      "latest_commit": "2026-01-26T20:58:32",
+      "last_analyzed": "2026-01-28T21:24:45.667358"
+    },
+    {
+      "user_username": "aelassas",
+      "name": "wexflow",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['C#', 'JavaScript', 'Inno Setup', 'HTML', 'CSS', 'Batchfile', 'Java', 'Swift', 'PowerShell', 'Shell', 'Dockerfile', 'Objective-C']",
+      "latest_commit": "2026-01-18T12:40:33",
+      "last_analyzed": "2026-01-28T21:24:45.670355"
+    },
+    {
+      "user_username": "kentcdodds",
+      "name": "cross-env",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'JavaScript']",
+      "latest_commit": "2025-11-16T14:10:20",
+      "last_analyzed": "2026-01-28T21:17:53.604202"
+    },
+    {
+      "user_username": "kentcdodds",
+      "name": "match-sorter",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'JavaScript']",
+      "latest_commit": "2025-11-24T19:03:46",
+      "last_analyzed": "2026-01-28T21:17:53.608201"
+    },
+    {
+      "user_username": "kentcdodds",
+      "name": "bookshelf",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'HTML', 'CSS', 'Dockerfile']",
+      "latest_commit": "2024-11-25T23:57:48",
+      "last_analyzed": "2026-01-28T21:17:53.612981"
+    },
+    {
+      "user_username": "kentcdodds",
+      "name": "babel-plugin-macros",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript']",
+      "latest_commit": "2023-01-23T15:04:03",
+      "last_analyzed": "2026-01-28T21:17:53.616974"
+    },
+    {
+      "user_username": "kentcdodds",
+      "name": "kentcdodds.com",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['MDX', 'TypeScript', 'JavaScript', 'CSS', 'Dockerfile', 'Shell']",
+      "latest_commit": "2026-01-26T15:06:55",
+      "last_analyzed": "2026-01-28T21:17:53.620973"
+    },
+    {
+      "user_username": "kentcdodds",
+      "name": "use-deep-compare-effect",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'JavaScript']",
+      "latest_commit": "2022-03-15T16:10:49",
+      "last_analyzed": "2026-01-28T21:17:53.623973"
+    },
+    {
+      "user_username": "kentcdodds",
+      "name": "mdx-bundler",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'MDX']",
+      "latest_commit": "2025-10-23T00:11:51",
+      "last_analyzed": "2026-01-28T21:17:53.629385"
+    },
+    {
+      "user_username": "kentcdodds",
+      "name": "advanced-react-patterns-v2",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'HTML', 'CSS']",
+      "latest_commit": "2020-03-18T23:40:20",
+      "last_analyzed": "2026-01-28T21:17:53.633363"
+    },
+    {
+      "user_username": "velopert",
+      "name": "sangte",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'JavaScript', 'HTML']",
+      "latest_commit": "2023-01-05T11:40:00",
+      "last_analyzed": "2026-01-28T21:24:22.545632"
+    },
+    {
+      "user_username": "jojoldu",
+      "name": "freelec-springboot2-webservice",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Java', 'Shell', 'HTML', 'JavaScript', 'TSQL', 'PHP']",
+      "latest_commit": "2020-08-16T07:25:21",
+      "last_analyzed": "2026-01-28T21:24:27.363277"
+    },
+    {
+      "user_username": "jojoldu",
+      "name": "blog-code",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Java', 'JavaScript', 'HTML', 'CSS', 'TypeScript', 'Groovy', 'FreeMarker', 'Shell', 'Handlebars', 'Pug', 'Mustache']",
+      "latest_commit": "2026-01-27T13:16:56",
+      "last_analyzed": "2026-01-28T21:24:27.365276"
+    },
+    {
+      "user_username": "jojoldu",
+      "name": "springboot-webservice",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Java', 'HTML', 'JavaScript', 'Shell']",
+      "latest_commit": "2018-02-19T12:00:21",
+      "last_analyzed": "2026-01-28T21:24:27.372114"
+    },
+    {
+      "user_username": "jojoldu",
+      "name": "review",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['HTML', 'CSS', 'JavaScript']",
+      "latest_commit": "2020-12-03T08:49:28",
+      "last_analyzed": "2026-01-28T21:24:27.374675"
+    },
+    {
+      "user_username": "jojoldu",
+      "name": "markdown-tistory",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'CSS', 'HTML']",
+      "latest_commit": "2023-07-16T06:38:33",
+      "last_analyzed": "2026-01-28T21:24:27.377671"
+    },
+    {
+      "user_username": "jojoldu",
+      "name": "translator",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Java']",
+      "latest_commit": "2018-07-28T09:02:13",
+      "last_analyzed": "2026-01-28T21:24:27.379672"
+    },
+    {
+      "user_username": "woowacourse",
+      "name": "prolog",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['Java', 'TypeScript', 'JavaScript', 'HCL', 'Gherkin', 'Smalltalk', 'HTML', 'Shell', 'Dockerfile']",
+      "latest_commit": "2025-05-11T23:13:25",
+      "last_analyzed": "2026-01-28T21:24:43.128020"
+    },
+    {
+      "user_username": "woowacourse",
+      "name": "java-baseball-precourse",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 1, Langs: ['Java']",
+      "latest_commit": "2021-11-24T02:00:28",
+      "last_analyzed": "2026-01-28T21:24:43.131021"
+    },
+    {
+      "user_username": "woowacourse",
+      "name": "perf-basecamp",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 18, Langs: ['TypeScript', 'CSS', 'JavaScript', 'HTML']",
+      "latest_commit": "2024-09-03T03:45:03",
+      "last_analyzed": "2026-01-28T21:24:43.134113"
+    },
+    {
+      "user_username": "aelassas",
+      "name": "bookcars",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'CSS', 'JavaScript', 'PowerShell', 'Shell', 'Dockerfile', 'HTML']",
+      "latest_commit": "2025-12-21T18:38:40",
+      "last_analyzed": "2026-01-28T21:24:45.673355"
+    },
+    {
+      "user_username": "aelassas",
+      "name": "movinin",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'CSS', 'JavaScript', 'PowerShell', 'Shell', 'HTML', 'Dockerfile']",
+      "latest_commit": "2025-12-21T18:31:13",
+      "last_analyzed": "2026-01-28T21:24:45.676355"
+    },
+    {
+      "user_username": "aelassas",
+      "name": "microservices",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['C#', 'JavaScript', 'HTML', 'Dockerfile', 'CSS']",
+      "latest_commit": "2025-09-11T14:03:11",
+      "last_analyzed": "2026-01-28T21:24:45.679461"
+    },
+    {
+      "user_username": "aelassas",
+      "name": "wexstream",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'CSS', 'Shell', 'HTML']",
+      "latest_commit": "2025-02-07T22:23:21",
+      "last_analyzed": "2026-01-28T21:24:45.681977"
+    },
+    {
+      "user_username": "dwyl",
+      "name": "english-words",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Python', 'Shell']",
+      "latest_commit": "2025-01-06T17:34:05",
+      "last_analyzed": "2026-01-28T21:24:48.533369"
+    },
+    {
+      "user_username": "dwyl",
+      "name": "learn-json-web-tokens",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'HTML', 'Procfile']",
+      "latest_commit": "2025-01-01T14:50:11",
+      "last_analyzed": "2026-01-28T21:24:48.536371"
+    },
+    {
+      "user_username": "woowacourse",
+      "name": "react-payments",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 4, Langs: ['TypeScript', 'JavaScript', 'HTML']",
+      "latest_commit": "2025-04-24T22:50:43",
+      "last_analyzed": "2026-01-28T21:24:43.136631"
+    },
+    {
+      "user_username": "dwyl",
+      "name": "learn-to-send-email-via-google-script-html-no-server",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['HTML', 'JavaScript', 'CSS']",
+      "latest_commit": "2022-06-23T00:25:27",
+      "last_analyzed": "2026-01-28T21:24:48.540369"
+    },
+    {
+      "user_username": "dwyl",
+      "name": "repo-badges",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['HTML']",
+      "latest_commit": "2024-12-30T16:09:04",
+      "last_analyzed": "2026-01-28T21:24:48.543368"
+    },
+    {
+      "user_username": "aelassas",
+      "name": "wexcommerce",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'CSS', 'JavaScript', 'PowerShell', 'Shell', 'Dockerfile']",
+      "latest_commit": "2025-12-21T16:53:14",
+      "last_analyzed": "2026-01-28T21:24:45.685006"
+    },
+    {
+      "user_username": "aelassas",
+      "name": "tdd",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['C#']",
+      "latest_commit": "2024-12-04T08:08:46",
+      "last_analyzed": "2026-01-28T21:24:45.687978"
+    },
+    {
+      "user_username": "dwyl",
+      "name": "learn-tdd",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'HTML']",
+      "latest_commit": "2024-10-21T21:21:43",
+      "last_analyzed": "2026-01-28T21:24:48.546367"
+    },
+    {
+      "user_username": "dwyl",
+      "name": "start-here",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: []",
+      "latest_commit": "2024-10-16T22:51:40",
+      "last_analyzed": "2026-01-28T21:24:48.548367"
+    },
+    {
+      "user_username": "dwyl",
+      "name": "learn-elixir",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['Elixir']",
+      "latest_commit": "2024-10-05T18:51:44",
+      "last_analyzed": "2026-01-28T21:24:48.551493"
+    },
+    {
+      "user_username": "dwyl",
+      "name": "learn-travis",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript']",
+      "latest_commit": "2022-03-24T12:06:34",
+      "last_analyzed": "2026-01-28T21:24:48.555067"
+    },
+    {
+      "user_username": "jeonghwan-kim",
+      "name": "git-usage",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 10, Langs: []",
+      "latest_commit": "2019-12-23T23:33:07",
+      "last_analyzed": "2026-01-28T21:24:50.888626"
+    },
+    {
+      "user_username": "jeonghwan-kim",
+      "name": "lecture-frontend-dev-env",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 28, Langs: ['JavaScript', 'SCSS', 'HTML', 'CSS']",
+      "latest_commit": "2022-06-16T11:55:21",
+      "last_analyzed": "2026-01-28T21:24:50.891627"
+    },
+    {
+      "user_username": "jeonghwan-kim",
+      "name": "lecture-node-api",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 11, Langs: ['JavaScript']",
+      "latest_commit": "2021-01-30T00:59:24",
+      "last_analyzed": "2026-01-28T21:24:50.893627"
+    },
+    {
+      "user_username": "jeonghwan-kim",
+      "name": "lecture-vue-trello",
+      "analysis_type": "Fixer",
+      "analysis_summary": "Commits: 32, Langs: ['Vue', 'JavaScript', 'HTML']",
+      "latest_commit": "2018-07-22T03:02:16",
+      "last_analyzed": "2026-01-28T21:24:50.895628"
+    },
+    {
+      "user_username": "jeonghwan-kim",
+      "name": "lecture-vue",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 23, Langs: ['JavaScript', 'HTML', 'CSS']",
+      "latest_commit": "2023-02-04T23:44:08",
+      "last_analyzed": "2026-01-28T21:24:50.898627"
+    },
+    {
+      "user_username": "jeonghwan-kim",
+      "name": "lecture-react",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['JavaScript', 'CSS', 'HTML']",
+      "latest_commit": "2024-07-28T12:20:18",
+      "last_analyzed": "2026-01-28T21:24:50.901723"
+    },
+    {
+      "user_username": "jeonghwan-kim",
+      "name": "jeonghwan-kim.github.com",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 50, Langs: ['TypeScript', 'JavaScript', 'Smarty']",
+      "latest_commit": "2025-09-21T22:44:36",
+      "last_analyzed": "2026-01-28T21:24:50.904295"
+    },
+    {
+      "user_username": "jeonghwan-kim",
+      "name": "lecture-develop-fe-with-tdd",
+      "analysis_type": "Builder",
+      "analysis_summary": "Commits: 33, Langs: ['JavaScript', 'HTML', 'CSS']",
+      "latest_commit": "2018-04-14T12:14:27",
+      "last_analyzed": "2026-01-28T21:24:50.907304"
+    }
+  ]
+}
