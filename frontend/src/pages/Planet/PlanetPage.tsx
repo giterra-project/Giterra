@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
@@ -11,31 +11,15 @@ import gsap from 'gsap';
 import { generatePlanetFromCommits } from '../../utils/planetGenerator';
 import type { PlanetConfig, PlanetAsset, CommitData, CommitType } from '../../types';
 import PlanetAssetRenderer from '../../components/planet/PlanetAssetRenderer';
-import { useLanguageStore } from '../../store/useLanguageStore';
-import Header from '../../components/layout/Header';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-import { useState, useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
-import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
-import { Search, ChevronRight, RotateCcw, Loader2, Shield, MessageSquare, Zap, Target } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
-import Header from '../../components/layout/Header';
 import InsightCard from '../../components/analysis/InsightCard';
 import InsightModal from '../../components/analysis/InsightModal';
 import { getHeadline, getPreview, splitMarkdownSections, stripMarkdown } from '../../lib/analysis';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import type { PlanetData, RepoDetail } from '../../types/store';
+import Header from '../../components/layout/Header';
 
-// ... (RepositoryList component remains unchanged for now) ...
-interface Repo {
-    name: string;
-    description: string | null;
-    stars: number;
-    language: string | null;
-    updated_at: string;
-}
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 const parseCommitType = (message: string): CommitType => {
     const lowerMsg = message.toLowerCase();
@@ -100,11 +84,10 @@ const RepositoryList = ({
 
     return (
         <motion.div
-            initial={{ x: 500, opacity: 0 }}
+            initial={{ x: -400, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 500, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 100, damping: 20 }}
-            className="absolute right-0 top-0 z-50 h-full w-[500px] bg-black/60 pt-24 backdrop-blur-2xl border-l border-white/10"
+            exit={{ x: -400, opacity: 0 }}
+            className="absolute left-0 top-0 z-50 h-full w-[350px] bg-black/60 pt-24 backdrop-blur-xl border-r border-white/10"
         >
             <div className="px-6 h-full flex flex-col">
                 <div className="flex items-center justify-between mb-6">
@@ -182,100 +165,6 @@ const DropDetector = ({ isDragging, mousePosRef, segmentsGroupRef, hoveredRef, s
     return null;
 };
 
-
-// [NEW] Detailed Analysis Panel
-const DetailPanel = ({
-    repo,
-    onOpenInsight,
-}: {
-    repo: RepoDetail;
-    onOpenInsight: (title: string, content: string) => void;
-}) => {
-    const { t } = useLanguageStore();
-
-    const cards = [
-        {
-            label: t('커뮤니케이션·컨벤션', 'Communication & Convention'),
-            content: repo.analysis_sub3 ? stripMarkdown(repo.analysis_sub3) : t('분석 데이터가 없습니다.', 'No analysis data.'),
-        },
-        {
-            label: t('안정성·유지보수', 'Stability & Maintenance'),
-            content: repo.analysis_sub2 ? stripMarkdown(repo.analysis_sub2) : t('분석 데이터가 없습니다.', 'No analysis data.'),
-        },
-        {
-            label: t('기술·아키텍처', 'Tech & Architecture'),
-            content: repo.analysis_sub1 ? stripMarkdown(repo.analysis_sub1) : t('분석 데이터가 없습니다.', 'No analysis data.'),
-        },
-        {
-            label: t('AI 요약', 'AI Summary'),
-            content: repo.analysis_summary ? stripMarkdown(repo.analysis_summary) : t('요약 정보가 없습니다.', 'No summary available.'),
-        },
-    ].map((item) => ({
-        ...item,
-        title: getHeadline(item.content) || item.label,
-        preview: getPreview(item.content, 130),
-    }));
-
-    return (
-        <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 50 }}
-            className="absolute right-10 top-24 bottom-24 w-[400px] z-50 bg-black/60 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 overflow-y-auto custom-scrollbar shadow-2xl"
-        >
-            <div className="flex items-center gap-4 mb-6">
-                <div className="text-4xl filter drop-shadow-md">
-                    {repo.building_type?.includes('Tree') ? '🌳' :
-                        repo.building_type?.includes('Building') ? '🏢' :
-                            repo.building_type?.includes('Bunker') ? '🏭' :
-                                '📦'}
-                </div>
-                <div>
-                    <h2 className="text-2xl font-bold text-white leading-none">{repo.name}</h2>
-                    <span className="text-indigo-400 text-sm font-semibold">{repo.building_type || 'Unknown Asset'}</span>
-                    {repo.updated_at && (
-                        <span className="block text-xs text-gray-500 mt-1">Last Updated: {new Date(repo.updated_at).toLocaleDateString()}</span>
-                    )}
-                </div>
-            </div>
-
-            <div className="space-y-3">
-                {cards.map((card) => (
-                    <InsightCard
-                        key={card.label}
-                        label={card.label}
-                        title={card.title}
-                        preview={card.preview}
-                        onClick={() => onOpenInsight(card.label, card.content)}
-                    />
-                ))}
-            </div>
-        </motion.div>
-    );
-};
-
-const PlanetPage = () => {
-    const { t } = useLanguageStore();
-    const { user } = useAuthStore();
-    const location = useLocation();
-    const username = location.state?.username ?? user?.login;
-
-    // 만약 username이 있으면 사이드바를 자동으로 열어줌 (선택사항)
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false); // 처음엔 닫아둠 (행성이 보이게)
-    const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
-    const [sectionData, setSectionData] = useState<{ [key: string]: string }>({});
-    const [dragOverId, setDragOverId] = useState<string | null>(null);
-
-    // [NEW] Planet Data State
-    const [planetData, setPlanetData] = useState<PlanetData | null>(null);
-    const [isLoadingPlanet, setIsLoadingPlanet] = useState(false);
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [activeInsight, setActiveInsight] = useState<{ title: string; content: string } | null>(null);
-
-    const rotateX = useMotionValue(0);
-    const rotateY = useMotionValue(0);
-    const [isBackFacing, setIsBackFacing] = useState(false);
-
 const InteractionSegments = ({ segmentsGroupRef, onClick }: any) => {
     const radius = 100;
     return (
@@ -320,143 +209,9 @@ const CameraController = ({
 }) => {
     const { camera } = useThree();
 
-    const overallCards = useMemo(() => {
-        const sections = splitMarkdownSections(planetData?.overall_analysis);
-        if (sections.length === 0) return [];
-
-        const preferred = sections.filter((section) => /(강점|약점|종합|페르소나)/.test(section.title));
-        const selected = (preferred.length > 0 ? preferred : sections).slice(0, 4);
-
-        return selected.map((section) => {
-            let icon: LucideIcon = Zap;
-            let color = "text-indigo-400";
-
-            if (section.title.includes("강점")) { icon = Zap; color = "text-amber-400"; }
-            else if (section.title.includes("약점")) { icon = Target; color = "text-rose-400"; }
-            else if (section.title.includes("종합")) { icon = Shield; color = "text-emerald-400"; }
-            else if (section.title.includes("페르소나")) { icon = MessageSquare; color = "text-purple-400"; }
-
-            return {
-                label: section.title,
-                title: getHeadline(section.content) || section.title,
-                preview: getPreview(section.content, 80),
-                content: section.content,
-                icon,
-                color
-            };
-        });
-    }, [planetData?.overall_analysis]);
-
-    // [NEW] Get selected repo for Detail Panel
-
-
-    useEffect(() => {
-
-        if (username) {
-            fetchPlanetData();
-        }
-    }, [username]);
-
-    const fetchPlanetData = async () => {
-        setIsLoadingPlanet(true);
-        try {
-            const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-            const res = await fetch(`${BASE_URL}/planet/${username}`);
-            if (!res.ok) throw new Error('Failed to fetch planet data');
-            const data: PlanetData = await res.json();
-            setPlanetData(data);
-
-            // [Temporary] Auto-place analyzed repos into slots 
-            // 분석된 레포지토리가 있으면 자동으로 슬롯에 할당하여 시각화 (앞면 TL, TR, BL, BR 순서)
-            const newSectionData: { [key: string]: string } = {};
-            const slots = ['Front-TL', 'Front-TR', 'Front-BL', 'Front-BR', 'Back-TL', 'Back-TR', 'Back-BL', 'Back-BR'];
-
-            // 분석된 레포만 필터링 (building_type이 있는)
-            const analyzedRepos = data.repositories.filter(r => r.building_type && r.building_type !== 'Unknown');
-
-            analyzedRepos.forEach((repo, idx) => {
-                if (idx < slots.length) {
-                    newSectionData[slots[idx]] = repo.name;
-                }
-            });
-            setSectionData((prev) => (Object.keys(prev).length > 0 ? prev : newSectionData));
-
-        } catch (error) {
-            console.error("Planet fetch error:", error);
-        } finally {
-            setIsLoadingPlanet(false);
-        }
-    };
-
-    const handleAnalyze = async () => {
-        if (!username || isAnalyzing) return;
-
-        const selectedRepos = Array.from(new Set(Object.values(sectionData)))
-            .map((repoName) => repoName.trim())
-            .filter((repoName) => repoName.length > 0);
-
-        if (selectedRepos.length === 0) {
-            alert(t('레포지토리를 슬롯에 배치해주세요.', 'Place repositories into slots first.'));
-            return;
-        }
-
-        setIsAnalyzing(true);
-        try {
-            const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-            const res = await fetch(`${BASE_URL}/analyze/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    github_username: username,
-                    selected_repos: selectedRepos,
-                }),
-            });
-
-            if (!res.ok) {
-                let errorMessage = 'Failed to analyze repositories';
-                const errorText = await res.text();
-
-                if (errorText) {
-                    try {
-                        const errorJson = JSON.parse(errorText) as { detail?: string };
-                        errorMessage = errorJson.detail ?? errorMessage;
-                    } catch (parseError) {
-                        errorMessage = errorText;
-                    }
-                }
-
-                throw new Error(errorMessage);
-            }
-
-            await fetchPlanetData();
-        } catch (error) {
-            console.error('Analyze error:', error);
-            alert(t('분석에 실패했습니다.', 'Analysis failed.'));
-        } finally {
-            setIsAnalyzing(false);
-        }
-    };
-
     useEffect(() => {
         if (!controlsRef.current) return;
         const controls = controlsRef.current;
-        const unsubscribe = rotateY.onChange((v) => {
-            const normalizedY = Math.abs(Math.floor((v + 90) / 180) % 2);
-            setIsBackFacing(normalizedY === 1);
-        });
-        return () => unsubscribe();
-    }, [rotateY]);
-
-
-    const positions = ['TL', 'TR', 'BL', 'BR'];
-
-    const handleSegmentClick = (side: 'Front' | 'Back', pos: string) => {
-        const id = `${side}-${pos}`;
-        if (selectedSegment === id) handleBackToPlanet();
-        else setSelectedSegment(id);
-    };
 
         if (targetSegment !== null) {
             const isTop = targetSegment < 4;
@@ -508,15 +263,22 @@ const CameraController = ({
 };
 
 const PlanetPage = () => {
+    const { t } = useLanguageStore();
+    const { user } = useAuthStore();
     const location = useLocation();
-    const username = location.state?.username || "Guest";
+    const username = location.state?.username ?? user?.login ?? "Guest";
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isMockMode, setIsMockMode] = useState(true);
     const [isLoadingSegment, setIsLoadingSegment] = useState<number | null>(null);
 
     const [segmentConfigs, setSegmentConfigs] = useState<Record<number, PlanetConfig>>({});
-    const [repoNames, setRepoNames] = useState<Record<number, string>>({}); // 여기서 사용됨
+    const [repoNames, setRepoNames] = useState<Record<number, string>>({});
+
+    const [planetData, setPlanetData] = useState<PlanetData | null>(null);
+    const [isLoadingPlanet, setIsLoadingPlanet] = useState(false);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [activeInsight, setActiveInsight] = useState<{ title: string; content: string } | null>(null);
 
     const [focusedSegment, setFocusedSegment] = useState<number | null>(null);
     const [hoveredSegmentState, setHoveredSegmentState] = useState<number | null>(null);
@@ -527,6 +289,115 @@ const PlanetPage = () => {
     const segmentsGroupRef = useRef<THREE.Group>(null);
     const mousePosRef = useRef({ x: 0, y: 0 });
     const controlsRef = useRef<OrbitControlsImpl>(null);
+
+    const assignedRepos = useMemo(
+        () => Array.from(new Set(Object.values(repoNames))).filter((name) => Boolean(name)),
+        [repoNames],
+    );
+
+    const focusedRepo: RepoDetail | null = useMemo(() => {
+        if (focusedSegment === null) return null;
+        const repoName = repoNames[focusedSegment];
+        if (!repoName || !planetData) return null;
+        return planetData.repositories.find((repo) => repo.name === repoName) ?? null;
+    }, [focusedSegment, planetData, repoNames]);
+
+    const overallCards = useMemo(() => {
+        const sections = splitMarkdownSections(planetData?.overall_analysis);
+        const preferred = sections.filter((section) => /(강점|약점|종합|페르소나)/.test(section.title));
+        const selected = (preferred.length > 0 ? preferred : sections).slice(0, 4);
+
+        return selected.map((section) => ({
+            label: section.title,
+            title: getHeadline(section.content) || section.title,
+            preview: getPreview(section.content, 120),
+            content: section.content,
+        }));
+    }, [planetData?.overall_analysis]);
+
+    const fetchPlanetData = async () => {
+        if (!username || username === "Guest") {
+            setPlanetData(null);
+            return;
+        }
+
+        setIsLoadingPlanet(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/planet/${username}`);
+            if (!res.ok) {
+                setPlanetData(null);
+                return;
+            }
+
+            const data: PlanetData = await res.json();
+            setPlanetData(data);
+        } catch (error) {
+            console.error('Planet fetch error:', error);
+            setPlanetData(null);
+        } finally {
+            setIsLoadingPlanet(false);
+        }
+    };
+
+    useEffect(() => {
+        void fetchPlanetData();
+    }, [username]);
+
+    const handleAnalyze = async () => {
+        if (!username || username === "Guest") {
+            alert(t('로그인 후 분석을 생성할 수 있습니다.', 'Please log in to generate analysis.'));
+            return;
+        }
+
+        if (isMockMode) {
+            alert(t('REAL API 모드에서만 분석을 생성할 수 있습니다.', 'Analysis is only available in REAL API mode.'));
+            return;
+        }
+
+        if (assignedRepos.length === 0) {
+            alert(t('먼저 레포지토리를 구역에 배치해주세요.', 'Drop repositories onto sectors first.'));
+            return;
+        }
+
+        if (isAnalyzing) return;
+
+        setIsAnalyzing(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/analyze/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    github_username: username,
+                    selected_repos: assignedRepos,
+                }),
+            });
+
+            if (!res.ok) {
+                let errorMessage = 'Failed to analyze repositories';
+                const errorText = await res.text();
+
+                if (errorText) {
+                    try {
+                        const errorJson = JSON.parse(errorText) as { detail?: string };
+                        errorMessage = errorJson.detail ?? errorMessage;
+                    } catch {
+                        errorMessage = errorText;
+                    }
+                }
+
+                throw new Error(errorMessage);
+            }
+
+            await fetchPlanetData();
+        } catch (error) {
+            console.error('Analyze error:', error);
+            alert(t('분석에 실패했습니다.', 'Analysis failed.'));
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
 
     const createMockCommits = (seedName: string) => {
         const count = 20 + Math.floor(Math.random() * 30);
@@ -595,78 +466,6 @@ const PlanetPage = () => {
 
         hoveredSegmentRef.current = null;
         setHoveredSegmentState(null);
-    const zoom = getZoomTransform();
-
-    // Helper to find repo details
-    const getRepoInSlot = (slotId: string) => {
-        const repoName = sectionData[slotId];
-        if (!repoName) return null;
-
-        const repo = planetData?.repositories.find(r => r.name === repoName);
-        if (repo) return repo;
-
-        return {
-            name: repoName,
-            stars: 0,
-            building_type: 'Unknown',
-        } satisfies RepoDetail;
-    };
-
-    // [NEW] Get selected repo for Detail Panel
-    const selectedRepo = selectedSegment ? getRepoInSlot(selectedSegment) : null;
-
-    const renderSegment = (side: 'Front' | 'Back', pos: string) => {
-        const id = `${side}-${pos}`;
-        const isSelected = selectedSegment === id;
-        const isDraggedOver = dragOverId === id;
-        const repo = getRepoInSlot(id);
-
-        return (
-            <div
-                key={id}
-                onClick={(e) => { e.stopPropagation(); handleSegmentClick(side, pos); }}
-                onDragOver={(e) => onDragOver(e, id)}
-                onDragLeave={onDragLeave}
-                onDrop={(e) => onDrop(e, side, pos)}
-                className={`
-                    relative flex flex-col items-center justify-center border border-white/10 transition-all duration-300 overflow-hidden
-                    ${isSelected ? 'bg-white/30 backdrop-blur-md' : ''}
-                    ${isDraggedOver ? 'bg-indigo-500/40' : ''}
-                `}
-            >
-                <AnimatePresence>
-                    {isDraggedOver && (
-                        <motion.div
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            className="absolute inset-0 border-4 border-indigo-400/60 shadow-[inset_0_0_30px_rgba(129,140,248,0.5)] pointer-events-none"
-                        />
-                    )}
-                </AnimatePresence>
-
-                <div className="flex flex-col items-center justify-center pointer-events-none z-10 transition-transform duration-300">
-                    {/* [NEW] Show Building Type if available */}
-                    {repo ? (
-                        <div className="text-center">
-                            <span className="block text-2xl mb-1 filter drop-shadow-md">
-                                {/* Simple Emoji/Icon mapping for now */}
-                                {repo.building_type?.includes('Tree') ? '🌳' :
-                                    repo.building_type?.includes('Building') ? '🏢' :
-                                        repo.building_type?.includes('Bunker') ? '🏭' :
-                                            '📦'}
-                            </span>
-                            <span className={`text-white font-bold text-sm ${isDraggedOver ? 'scale-110' : ''}`}>
-                                {repo.name}
-                            </span>
-                            <span className="block text-[10px] text-white/70 mt-1">{repo.building_type}</span>
-                        </div>
-                    ) : (
-                        <span className={`text-white/30 font-bold text-center px-4 break-all text-sm ${isDraggedOver ? 'scale-110' : ''}`}>
-                            Empty Slot
-                        </span>
-                    )}
-                </div>
-            </div>
-        );
     };
 
     return (
@@ -718,122 +517,6 @@ const PlanetPage = () => {
                             <div className="flex flex-col items-center justify-center pointer-events-none">
                                 <Loader2 className="animate-spin text-indigo-400 w-12 h-12" />
                                 <span className="text-indigo-200 text-sm font-bold mt-2 bg-black/50 px-2 rounded">Generating...</span>
-            <AnimatePresence>{isSidebarOpen && <RepositoryList username={username} key="repo-list" />}</AnimatePresence>
-
-            {/* [NEW] Planet Persona HUD */}
-            {planetData && !selectedSegment && (
-                <div className="absolute top-24 left-10 z-10">
-                    <motion.div
-                        initial={{ x: -20, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        className="bg-black/60 backdrop-blur-2xl border border-indigo-500/30 p-6 rounded-3xl max-w-sm shadow-[0_0_50px_-10px_rgba(79,70,229,0.3)]"
-                    >
-                        {isLoadingPlanet ? (
-                            <div className="flex items-center gap-2">
-                                <Loader2 className="animate-spin text-indigo-400" size={16} />
-                                <span className="text-indigo-200 text-sm">Loading Planet Data...</span>
-                            </div>
-                        ) : (
-                            <>
-                                <h2 className="text-indigo-400 text-sm font-bold tracking-widest uppercase mb-1">PLANET PERSONA</h2>
-                                <h1 className="text-3xl font-black text-white mb-2 leading-tight">{planetData.persona.split('(')[0]}</h1>
-                                {planetData.persona.includes('(') && (
-                                    <span className="text-white/50 text-sm font-mono block mb-4">{planetData.persona.match(/\((.*?)\)/)?.[1]}</span>
-                                )}
-
-                                <div className="flex gap-4 border-t border-white/10 pt-4">
-                                    <div>
-                                        <div className="text-xs text-gray-400 uppercase">Contribution</div>
-                                        <div className="text-xl font-bold text-white">{planetData.total_score}</div>
-                                    </div>
-                                    <div>
-                                        <div className="text-xs text-gray-400 uppercase">Repos</div>
-                                        <div className="text-xl font-bold text-white">{planetData.repositories.length}</div>
-                                    </div>
-                                    <div>
-                                        <div className="text-xs text-gray-400 uppercase">Theme</div>
-                                        <div className="text-xl font-bold text-indigo-300 capitalize">{planetData.theme.replace('_', ' ')}</div>
-                                    </div>
-                                </div>
-
-                                <div className="mt-4 border-t border-white/10 pt-4">
-                                    <div className="text-xs text-gray-400 uppercase mb-2">{t('전체 분석', 'Overall Analysis')}</div>
-                                    {overallCards.length > 0 ? (
-                                        <div className="flex flex-col gap-3">
-                                            {overallCards.map((card) => (
-                                                <InsightCard
-                                                    key={card.label}
-                                                    label={card.label}
-                                                    title={card.title}
-                                                    preview={card.preview}
-                                                    icon={card.icon}
-                                                    color={card.color}
-                                                    onClick={() => setActiveInsight({ title: card.label, content: card.content })}
-                                                />
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="text-sm text-white/60 leading-relaxed">
-                                            {t('아직 전체 분석이 없습니다. 우측 상단에서 분석 생성을 눌러주세요.', 'No overall analysis yet. Click ANALYZE to generate it.')}
-                                        </div>
-                                    )}
-                                </div>
-
-                                <button
-                                    onClick={handleAnalyze}
-                                    disabled={!username || isAnalyzing || Object.keys(sectionData).length === 0}
-                                    className="w-full mt-6 rounded-xl border border-white/20 bg-indigo-600/20 py-3 text-sm font-bold text-white hover:bg-indigo-500/30 hover:border-indigo-400 transition-all shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                    {isAnalyzing ? (
-                                        <span className="flex items-center justify-center gap-2">
-                                            <Loader2 size={16} className="animate-spin" />
-                                            {t('분석 중...', 'Analyzing...')}
-                                        </span>
-                                    ) : (
-                                        t('새 분석 데이터 생성', 'GENERATE NEW ANALYSIS')
-                                    )}
-                                </button>
-                            </>
-                        )}
-                    </motion.div>
-                </div>
-            )}
-
-            <main className="relative flex h-full w-full items-center justify-center overflow-hidden">
-                <motion.div
-                    drag={!selectedSegment}
-                    dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-                    dragElastic={0}
-                    onDrag={(_, info) => {
-                        rotateY.set(rotateY.get() + info.delta.x * 0.3);
-                        rotateX.set(rotateX.get() - info.delta.y * 0.3);
-                    }}
-                    animate={{
-                        x: zoom.x,
-                        y: zoom.y,
-                        scale: zoom.scale,
-                        rotateX: zoom.rx !== null ? zoom.rx : undefined,
-                        rotateY: zoom.ry !== null ? zoom.ry : undefined,
-                    }}
-                    style={{
-                        rotateX: zoom.rx === null ? smoothRotateX : undefined,
-                        rotateY: zoom.ry === null ? smoothRotateY : undefined,
-                        transformStyle: 'preserve-3d',
-                    }}
-                    transition={{ type: 'spring', stiffness: 60, damping: 20 }}
-                    className="relative w-[600px] h-[600px] cursor-grab active:cursor-grabbing"
-                >
-                    <div
-                        className="absolute inset-0 z-10"
-                        style={{
-                            backfaceVisibility: 'hidden',
-                            pointerEvents: isBackFacing ? 'none' : 'auto'
-                        }}
-                    >
-                        <div className="absolute inset-0 rounded-full bg-indigo-600/30 blur-[120px]" />
-                        <div className="relative h-full w-full rounded-full overflow-hidden border-[3px] border-white/20 bg-gradient-to-br from-indigo-900 via-purple-800 to-blue-900 shadow-[inset_-40px_-40px_100px_rgba(0,0,0,0.8)]">
-                            <div className="grid grid-cols-2 grid-rows-2 h-full w-full z-10 relative">
-                                {positions.map(pos => renderSegment('Front', pos))}
                             </div>
                         </Html>
                     )}
@@ -874,17 +557,73 @@ const PlanetPage = () => {
                     <Environment preset="city" />
                 </Canvas>
 
-                {/* --- UI Overlays --- */}
-
-                {/* [NEW] Detail Panel for Selected Repo */}
                 <AnimatePresence>
-                    {selectedSegment && selectedRepo && (
-                        <DetailPanel
-                            repo={selectedRepo}
-                            onOpenInsight={(title, content) => setActiveInsight({ title, content })}
-                        />
+                    {username !== "Guest" && (
+                        <motion.div
+                            initial={{ x: -20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            exit={{ x: -20, opacity: 0 }}
+                            className={`absolute top-24 ${isSidebarOpen ? 'left-[370px]' : 'left-10'} z-40 w-[360px] bg-black/60 backdrop-blur-2xl border border-indigo-500/30 rounded-3xl p-6 shadow-[0_0_50px_-10px_rgba(79,70,229,0.3)]`}
+                        >
+                            {isLoadingPlanet ? (
+                                <div className="flex items-center gap-2">
+                                    <Loader2 className="animate-spin text-indigo-400" size={16} />
+                                    <span className="text-indigo-200 text-sm">Loading Planet Data...</span>
+                                </div>
+                            ) : planetData ? (
+                                <>
+                                    <h2 className="text-indigo-400 text-sm font-bold tracking-widest uppercase mb-1">PLANET PERSONA</h2>
+                                    <h1 className="text-3xl font-black text-white mb-2 leading-tight">{planetData.persona.split('(')[0]}</h1>
+                                    {planetData.persona.includes('(') && (
+                                        <span className="text-white/50 text-sm font-mono block mb-4">{planetData.persona.match(/\((.*?)\)/)?.[1]}</span>
+                                    )}
+
+                                    <div className="flex gap-4 border-t border-white/10 pt-4">
+                                        <div>
+                                            <div className="text-xs text-gray-400 uppercase">Contribution</div>
+                                            <div className="text-xl font-bold text-white">{planetData.total_score}</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-xs text-gray-400 uppercase">Repos</div>
+                                            <div className="text-xl font-bold text-white">{planetData.repositories.length}</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-xs text-gray-400 uppercase">Theme</div>
+                                            <div className="text-xl font-bold text-indigo-300 capitalize">{planetData.theme.replace('_', ' ')}</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-4 border-t border-white/10 pt-4">
+                                        <div className="text-xs text-gray-400 uppercase mb-2">{t('전체 분석', 'Overall Analysis')}</div>
+                                        {overallCards.length > 0 ? (
+                                            <div className="space-y-3">
+                                                {overallCards.map((card) => (
+                                                    <InsightCard
+                                                        key={card.label}
+                                                        label={card.label}
+                                                        title={card.title}
+                                                        preview={card.preview}
+                                                        onClick={() => setActiveInsight({ title: card.label, content: card.content })}
+                                                    />
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="text-sm text-white/60 leading-relaxed">
+                                                {t('아직 전체 분석이 없습니다. 우측 하단에서 분석 생성을 눌러주세요.', 'No overall analysis yet. Click ANALYZE to generate it.')}
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="text-sm text-white/60 leading-relaxed">
+                                    {t('아직 분석 데이터가 없습니다. 레포를 배치한 뒤 분석 생성을 눌러주세요.', 'No analysis data yet. Drop repos then click ANALYZE.')}
+                                </div>
+                            )}
+                        </motion.div>
                     )}
                 </AnimatePresence>
+
+                {/* --- UI Overlays --- */}
 
                 <AnimatePresence>
                     {focusedSegment !== null && (
@@ -908,6 +647,34 @@ const PlanetPage = () => {
                                 <div className="text-gray-400 text-sm mt-1 font-mono">
                                     {segmentConfigs[focusedSegment]?.theme?.replace('_', ' ') || 'ANALYZING...'}
                                 </div>
+
+                                <div className="mt-4">
+                                    {focusedRepo ? (
+                                        <InsightCard
+                                            label={t('커뮤니케이션·컨벤션', 'Communication & Convention')}
+                                            title={
+                                                getHeadline(focusedRepo.analysis_sub3 ? stripMarkdown(focusedRepo.analysis_sub3) : '') ||
+                                                t('분석 데이터가 없습니다.', 'No analysis data.')
+                                            }
+                                            preview={getPreview(
+                                                focusedRepo.analysis_sub3 ? stripMarkdown(focusedRepo.analysis_sub3) : t('분석 데이터가 없습니다.', 'No analysis data.'),
+                                                110,
+                                            )}
+                                            onClick={() =>
+                                                setActiveInsight({
+                                                    title: t('커뮤니케이션·컨벤션', 'Communication & Convention'),
+                                                    content: focusedRepo.analysis_sub3
+                                                        ? stripMarkdown(focusedRepo.analysis_sub3)
+                                                        : t('분석 데이터가 없습니다.', 'No analysis data.'),
+                                                })
+                                            }
+                                        />
+                                    ) : (
+                                        <div className="text-sm text-white/50 leading-relaxed">
+                                            {t('이 레포의 분석 데이터가 없습니다.', 'No analysis for this repo yet.')}
+                                        </div>
+                                    )}
+                                </div>
                             </motion.div>
 
                             {/* 하단 뒤로가기 버튼 (그대로 유지) */}
@@ -924,15 +691,6 @@ const PlanetPage = () => {
                         </>
                     )}
                 </AnimatePresence>
-
-                <div className="absolute top-28 right-12 z-[60] flex flex-col items-end gap-3">
-                    <button
-                        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                        className="rounded-xl border-2 px-8 py-3 text-lg font-bold bg-black/40 text-white border-white/20 hover:bg-indigo-600/20 hover:border-indigo-400 backdrop-blur-xl transition-all shadow-lg"
-                    >
-                        {isSidebarOpen ? t('닫기', 'CLOSE') : t('편집', 'EDIT P.G')}
-                    </button>
-                </div>
 
                 <AnimatePresence>
                     {selectedAsset && (
@@ -959,6 +717,21 @@ const PlanetPage = () => {
 
                 <div className="absolute bottom-8 right-8 flex gap-4 z-30">
                     <button
+                        onClick={handleAnalyze}
+                        disabled={isAnalyzing || isMockMode || username === "Guest" || assignedRepos.length === 0}
+                        className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl backdrop-blur-md border border-white/10 font-bold disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                        {isAnalyzing ? (
+                            <span className="flex items-center gap-2">
+                                <Loader2 size={18} className="animate-spin" />
+                                {t('분석 중...', 'Analyzing...')}
+                            </span>
+                        ) : (
+                            t('분석 생성', 'ANALYZE')
+                        )}
+                    </button>
+
+                    <button
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                         className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl backdrop-blur-md border border-white/10 font-bold"
                     >
@@ -976,7 +749,7 @@ const PlanetPage = () => {
                     />
                 )}
             </AnimatePresence>
-        </motion.div>
+        </div>
     );
 };
 
