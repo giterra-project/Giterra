@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers import repo
 from app.routers import analyze
 from app.routers import auth
+from app.routers import planet
 
 from contextlib import asynccontextmanager
 from app.database import init_db
@@ -31,6 +32,7 @@ app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 # app.include_router(langgraph_app, prefix="/langgraph", tags=["Language Graph"])
 app.include_router(repo.router, prefix="/repos", tags=["Repositories"])
 app.include_router(analyze.router, prefix="/analyze", tags=["Analysis"])
+app.include_router(planet.router, tags=["Planet"])
 
 # API 엔드포인트
 
