@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { PlanetState, PlanetTheme, PlanetConfig } from '../types/store';
+import type { PlanetState, PlanetTheme, PlanetConfig } from '../types/store';
 
 const initialConfig: PlanetConfig = {
     theme: 'START_TREE',
