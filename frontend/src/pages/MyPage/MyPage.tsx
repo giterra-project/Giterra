@@ -4,6 +4,7 @@ import { Github, ExternalLink, User as UserIcon } from 'lucide-react';
 import Header from '../../components/layout/Header';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useLanguageStore } from '../../store/useLanguageStore';
+import { API_BASE_URL } from '../../lib/apiBase';
 
 const MyPage = () => {
     const navigate = useNavigate();
@@ -16,8 +17,7 @@ const MyPage = () => {
         }
 
         try {
-            const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-            const response = await fetch(`${BASE_URL}/auth/user`, {
+            const response = await fetch(`${API_BASE_URL}/auth/user`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `token ${accessToken}`
@@ -39,7 +39,7 @@ const MyPage = () => {
 
     if (!user) {
         return (
-            <div className="h-screen w-screen bg-black text-white flex items-center justify-center">
+            <div className="h-screen w-screen app-gradient-bg text-white flex items-center justify-center">
                 <p>{t('로그인이 필요합니다.', 'Login required.')}</p>
             </div>
         );
@@ -51,20 +51,18 @@ const MyPage = () => {
     };
 
     return (
-        <div className="min-h-screen w-full bg-black text-white selection:bg-indigo-500/30">
+        <div className="min-h-screen w-full app-gradient-bg text-white">
             <Header showSearch={true} />
 
-            <main className="container mx-auto px-6 pt-32 pb-20 max-w-lg">
+            <main className="mx-auto w-full max-w-3xl px-4 pb-20 pt-30 md:px-6">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex flex-col items-center gap-8"
+                    className="flex flex-col gap-6"
                 >
-                    {/* Profile Section */}
-                    <div className="w-full relative group">
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
-                        <div className="relative p-8 bg-black border border-white/10 rounded-3xl flex flex-col items-center text-center">
-                            <div className="relative w-32 h-32 mb-6 rounded-full overflow-hidden border-4 border-black ring-2 ring-white/20 shadow-2xl">
+                    <section className="glass-panel rounded-3xl p-6 md:p-8">
+                        <div className="flex flex-col items-center gap-5 text-center md:flex-row md:text-left">
+                            <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full border-2 border-white/15 shadow-xl md:h-32 md:w-32">
                                 {user.avatar_url ? (
                                     <img src={user.avatar_url} alt={user.login} className="w-full h-full object-cover" />
                                 ) : (
@@ -74,36 +72,41 @@ const MyPage = () => {
                                 )}
                             </div>
 
-                            <h1 className="text-2xl font-bold mb-1">{user.login}</h1>
-                            <a
-                                href={user.html_url || `https://github.com/${user.login}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="flex items-center gap-1.5 text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
-                            >
-                                <Github size={14} />
-                                <span>View on GitHub</span>
-                                <ExternalLink size={12} />
-                            </a>
+                            <div className="min-w-0">
+                                <h1 className="truncate text-2xl font-black md:text-3xl">{user.login}</h1>
+                                <p className="mt-1 text-sm text-white/60">{t('연결된 GitHub 계정', 'Connected GitHub account')}</p>
+                                <a
+                                    href={user.html_url || `https://github.com/${user.login}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="mt-3 inline-flex items-center gap-1.5 text-sm text-teal-300 hover:text-teal-200 transition-colors"
+                                >
+                                    <Github size={14} />
+                                    <span>View on GitHub</span>
+                                    <ExternalLink size={12} />
+                                </a>
+                            </div>
                         </div>
-                    </div>
+                    </section>
 
-                    {/* Actions */}
-                    <div className="flex flex-col items-center gap-4">
-                        <button
-                            onClick={handleLogout}
-                            className="px-8 py-3 rounded-full bg-white text-black font-bold hover:bg-gray-200 transition-colors"
-                        >
-                            {t('로그아웃', 'Logout')}
-                        </button>
+                    <section className="glass-panel rounded-3xl p-6">
+                        <h2 className="text-sm font-bold uppercase tracking-wider text-white/70">{t('계정 작업', 'Account Actions')}</h2>
+                        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+                            <button
+                                onClick={handleLogout}
+                                className="rounded-xl bg-teal-400 px-5 py-3 text-sm font-bold text-slate-900 transition-colors hover:bg-teal-300"
+                            >
+                                {t('로그아웃', 'Logout')}
+                            </button>
 
-                        <button
-                            onClick={handleWithdraw}
-                            className="text-gray-500 hover:text-red-500 transition-colors text-sm underline decoration-1 underline-offset-4"
-                        >
-                            {t('회원 탈퇴', 'Delete Account')}
-                        </button>
-                    </div>
+                            <button
+                                onClick={handleWithdraw}
+                                className="rounded-xl border border-red-400/35 bg-red-500/10 px-5 py-3 text-sm font-semibold text-red-200 transition-colors hover:bg-red-500/20"
+                            >
+                                {t('회원 탈퇴', 'Delete Account')}
+                            </button>
+                        </div>
+                    </section>
                 </motion.div>
             </main>
         </div>

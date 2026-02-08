@@ -1,6 +1,6 @@
-import { useRef, useLayoutEffect, useMemo } from 'react';
+import { useRef, useLayoutEffect } from 'react';
 import * as THREE from 'three';
-import { RoundedBox, Float, Cone, Cylinder, Box, Sphere, Icosahedron, Torus } from '@react-three/drei';
+import { Float, Cone, Cylinder, Box, Sphere, Torus } from '@react-three/drei';
 import type { PlanetAsset } from '../../types';
 
 interface PlanetAssetRendererProps {

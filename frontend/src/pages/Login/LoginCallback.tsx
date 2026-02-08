@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
+import { API_BASE_URL } from '../../lib/apiBase';
 
 const LoginCallback = () => {
     const navigate = useNavigate();
@@ -29,8 +30,7 @@ const LoginCallback = () => {
 
     const handleTokenLogin = async (token: string) => {
         try {
-            const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-            const response = await fetch(`${BASE_URL}/auth/me`, {
+            const response = await fetch(`${API_BASE_URL}/auth/me`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `token ${token}`, // GitHub API requires 'token' prefix usually, but check middleware. Auth router expects raw string in header? 

@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars, Environment, Html } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { ChevronRight, ArrowLeft, GitCommit, X, ToggleLeft, ToggleRight, Loader2, Database } from 'lucide-react';
+import { ChevronRight, ArrowLeft, GitCommit, X, ToggleLeft, ToggleRight, Loader2, Database, PanelLeftClose, PanelLeftOpen, Sparkles } from 'lucide-react';
 import * as THREE from 'three';
 import gsap from 'gsap';
 
@@ -18,8 +17,7 @@ import { useLanguageStore } from '../../store/useLanguageStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import type { PlanetData, RepoDetail } from '../../types/store';
 import Header from '../../components/layout/Header';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+import { API_BASE_URL } from '../../lib/apiBase';
 
 const parseCommitType = (message: string): CommitType => {
     const lowerMsg = message.toLowerCase();
@@ -35,14 +33,20 @@ const parseCommitType = (message: string): CommitType => {
 const RepositoryList = ({
     username,
     isMockMode,
-    setIsMockMode
+    setIsMockMode,
+    assignedCount,
+    accessToken,
+    onUnauthorized,
 }: {
     username?: string,
     isMockMode: boolean,
-    setIsMockMode: (v: boolean) => void
+    setIsMockMode: (v: boolean) => void,
+    assignedCount: number,
+    accessToken: string | null,
+    onUnauthorized: () => void,
 }) => {
     const { t } = useLanguageStore();
-    const [repos, setRepos] = useState<any[]>([]);
+    const [repos, setRepos] = useState<Array<{ name: string; stars: number; language?: string }>>([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const mockRepos = [
@@ -60,12 +64,27 @@ const RepositoryList = ({
         } else if (username) {
             fetchRealRepos();
         }
-    }, [isMockMode, username]);
+    }, [isMockMode, username, accessToken]);
 
     const fetchRealRepos = async () => {
+        if (!accessToken) {
+            onUnauthorized();
+            return;
+        }
+
         setIsLoading(true);
         try {
-            const res = await fetch(`${API_BASE_URL}/repos/${username}`);
+            const res = await fetch(`${API_BASE_URL}/repos/${username}`, {
+                headers: {
+                    Authorization: `token ${accessToken}`,
+                },
+            });
+
+            if (res.status === 401) {
+                onUnauthorized();
+                return;
+            }
+
             if (!res.ok) throw new Error('Failed');
             const data = await res.json();
             setRepos(data);
@@ -87,23 +106,28 @@ const RepositoryList = ({
             initial={{ x: -400, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -400, opacity: 0 }}
-            className="absolute left-0 top-0 z-50 h-full w-[350px] bg-black/60 pt-24 backdrop-blur-xl border-r border-white/10"
+            className="absolute left-0 top-0 z-50 h-full w-[84vw] max-w-[380px] border-r border-white/10 bg-black/65 pt-24 backdrop-blur-xl md:w-[360px]"
         >
-            <div className="px-6 h-full flex flex-col">
+            <div className="flex h-full flex-col px-4 md:px-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold text-white">{t('Repositories', 'Repositories')}</h2>
+                    <div>
+                        <h2 className="text-xl font-bold text-white">{t('Repositories', 'Repositories')}</h2>
+                        <p className="mt-1 text-xs text-white/50">
+                            {t('배치 완료', 'Assigned')}: <span className="font-semibold text-teal-300">{assignedCount}</span>
+                        </p>
+                    </div>
 
                     <button
                         onClick={() => setIsMockMode(!isMockMode)}
-                        className="flex items-center gap-2 text-xs font-bold px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-indigo-300"
+                        className="flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[11px] font-bold text-teal-200 transition-colors hover:bg-white/20"
                     >
                         {isMockMode ? "MOCK DATA" : "REAL API"}
-                        {isMockMode ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
+                        {isMockMode ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
                     </button>
                 </div>
 
                 {isLoading ? (
-                    <div className="flex justify-center p-10"><Loader2 className="animate-spin text-white" /></div>
+                    <div className="flex justify-center p-10"><Loader2 className="animate-spin text-teal-200" /></div>
                 ) : (
                     <div className="flex flex-col gap-3 overflow-y-auto pr-2 custom-scrollbar pb-10">
                         {repos.map((repo, index) => (
@@ -111,13 +135,13 @@ const RepositoryList = ({
                                 key={index}
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, repo.name)}
-                                className="group flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:border-indigo-500 hover:bg-white/10 cursor-grab active:cursor-grabbing transition-all"
+                                className="group flex cursor-grab items-center justify-between rounded-xl border border-white/10 bg-black/45 p-3 transition-all hover:border-teal-300/45 hover:bg-black/25 active:cursor-grabbing"
                             >
                                 <div>
                                     <div className="text-sm font-semibold text-white">{repo.name}</div>
-                                    <div className="text-xs text-gray-400 mt-1">{repo.language || 'Unknown'} • ⭐ {repo.stars || 0}</div>
+                                    <div className="mt-1 text-xs text-white/55">{repo.language || 'Unknown'} • ⭐ {repo.stars || 0}</div>
                                 </div>
-                                <ChevronRight size={16} className="text-gray-500 group-hover:text-white" />
+                                <ChevronRight size={16} className="text-white/35 group-hover:text-teal-200" />
                             </div>
                         ))}
                     </div>
@@ -130,8 +154,8 @@ const RepositoryList = ({
 const PlanetBorders = () => {
     const radius = 100.2;
     const thickness = 0.3;
-    const color = "#ffffff";
-    const opacity = 0.15;
+    const color = "#c9d6e3";
+    const opacity = 0.12;
 
     return (
         <group>
@@ -194,7 +218,7 @@ const SegmentHighlight = ({ segmentIndex }: { segmentIndex: number | null }) => 
     return (
         <mesh>
             <sphereGeometry args={[100.1, 32, 32, thetaStart, Math.PI / 2, phiStart, Math.PI / 2]} />
-            <meshBasicMaterial color="#6366f1" transparent opacity={0.3} side={THREE.DoubleSide} />
+            <meshBasicMaterial color="#14b8a6" transparent opacity={0.28} side={THREE.DoubleSide} />
         </mesh>
     );
 };
@@ -264,9 +288,8 @@ const CameraController = ({
 
 const PlanetPage = () => {
     const { t } = useLanguageStore();
-    const { user } = useAuthStore();
-    const location = useLocation();
-    const username = location.state?.username ?? user?.login ?? "Guest";
+    const { user, accessToken, clearAuth } = useAuthStore();
+    const username = user?.login ?? "Guest";
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isMockMode, setIsMockMode] = useState(true);
@@ -284,11 +307,16 @@ const PlanetPage = () => {
     const [hoveredSegmentState, setHoveredSegmentState] = useState<number | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [selectedAsset, setSelectedAsset] = useState<PlanetAsset | null>(null);
+    const [isCompactLayout, setIsCompactLayout] = useState(false);
 
     const hoveredSegmentRef = useRef<number | null>(null);
     const segmentsGroupRef = useRef<THREE.Group>(null);
     const mousePosRef = useRef({ x: 0, y: 0 });
     const controlsRef = useRef<OrbitControlsImpl>(null);
+    const authHeaders = useMemo(
+        () => (accessToken ? { Authorization: `token ${accessToken}` } : null),
+        [accessToken],
+    );
 
     const assignedRepos = useMemo(
         () => Array.from(new Set(Object.values(repoNames))).filter((name) => Boolean(name)),
@@ -315,15 +343,32 @@ const PlanetPage = () => {
         }));
     }, [planetData?.overall_analysis]);
 
+    const handleUnauthorized = () => {
+        clearAuth();
+    };
+
     const fetchPlanetData = async () => {
         if (!username || username === "Guest") {
             setPlanetData(null);
             return;
         }
 
+        if (!authHeaders) {
+            handleUnauthorized();
+            return;
+        }
+
         setIsLoadingPlanet(true);
         try {
-            const res = await fetch(`${API_BASE_URL}/planet/${username}`);
+            const res = await fetch(`${API_BASE_URL}/planet/${username}`, {
+                headers: authHeaders,
+            });
+
+            if (res.status === 401) {
+                handleUnauthorized();
+                return;
+            }
+
             if (!res.ok) {
                 setPlanetData(null);
                 return;
@@ -343,6 +388,25 @@ const PlanetPage = () => {
         void fetchPlanetData();
     }, [username]);
 
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const media = window.matchMedia('(max-width: 1024px)');
+        const syncLayout = (matches: boolean) => {
+            setIsCompactLayout(matches);
+            setIsSidebarOpen(!matches);
+        };
+
+        syncLayout(media.matches);
+
+        const onChange = (event: MediaQueryListEvent) => syncLayout(event.matches);
+        media.addEventListener('change', onChange);
+
+        return () => {
+            media.removeEventListener('change', onChange);
+        };
+    }, []);
+
     const handleAnalyze = async () => {
         if (!username || username === "Guest") {
             alert(t('로그인 후 분석을 생성할 수 있습니다.', 'Please log in to generate analysis.'));
@@ -360,6 +424,10 @@ const PlanetPage = () => {
         }
 
         if (isAnalyzing) return;
+        if (!authHeaders) {
+            handleUnauthorized();
+            return;
+        }
 
         setIsAnalyzing(true);
         try {
@@ -367,12 +435,18 @@ const PlanetPage = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    ...authHeaders,
                 },
                 body: JSON.stringify({
                     github_username: username,
                     selected_repos: assignedRepos,
                 }),
             });
+
+            if (res.status === 401) {
+                handleUnauthorized();
+                return;
+            }
 
             if (!res.ok) {
                 let errorMessage = 'Failed to analyze repositories';
@@ -410,7 +484,20 @@ const PlanetPage = () => {
     };
 
     const fetchRealCommits = async (repoName: string) => {
-        const res = await fetch(`${API_BASE_URL}/repos/${username}/${repoName}/commits`);
+        if (!authHeaders) {
+            handleUnauthorized();
+            throw new Error('Unauthorized');
+        }
+
+        const res = await fetch(`${API_BASE_URL}/repos/${username}/${repoName}/commits`, {
+            headers: authHeaders,
+        });
+
+        if (res.status === 401) {
+            handleUnauthorized();
+            throw new Error('Unauthorized');
+        }
+
         if (!res.ok) throw new Error("Fetch failed");
         const data = await res.json();
 
@@ -468,18 +555,37 @@ const PlanetPage = () => {
         setHoveredSegmentState(null);
     };
 
+    const isGuest = username === "Guest";
+    const summaryPanelLeft = isSidebarOpen && !isCompactLayout ? 'left-[380px]' : 'left-3';
+
     return (
-        <div className="relative h-screen w-screen bg-black overflow-hidden">
-            <Header showSearch={true} />
+        <div className="relative h-screen w-screen overflow-hidden app-gradient-bg">
+            <Header showSearch={true} searchTarget="/planet" />
 
             <AnimatePresence>
                 {isSidebarOpen && (
-                    <RepositoryList
-                        key="sidebar"
-                        username={username}
-                        isMockMode={isMockMode}
-                        setIsMockMode={setIsMockMode}
-                    />
+                    <>
+                        {isCompactLayout && (
+                            <motion.button
+                                type="button"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setIsSidebarOpen(false)}
+                                className="absolute inset-0 z-40 bg-black/45 backdrop-blur-[1px]"
+                                aria-label="Close sidebar overlay"
+                            />
+                        )}
+                        <RepositoryList
+                            key="sidebar"
+                            username={username}
+                            isMockMode={isMockMode}
+                            setIsMockMode={setIsMockMode}
+                            assignedCount={assignedRepos.length}
+                            accessToken={accessToken}
+                            onUnauthorized={handleUnauthorized}
+                        />
+                    </>
                 )}
             </AnimatePresence>
 
@@ -490,14 +596,14 @@ const PlanetPage = () => {
                 onDrop={handleDrop}
             >
                 <Canvas camera={{ position: [0, 0, 280], fov: 45 }}>
-                    <color attach="background" args={['#050505']} />
-                    <ambientLight intensity={0.2} />
+                    <color attach="background" args={['#060f15']} />
+                    <ambientLight intensity={0.25} />
                     <pointLight position={[100, 100, 100]} intensity={2} />
-                    <pointLight position={[-100, -50, -50]} intensity={1} color="#4f46e5" />
+                    <pointLight position={[-100, -50, -50]} intensity={1} color="#14b8a6" />
 
                     <mesh onClick={(e) => { e.stopPropagation(); setFocusedSegment(null); setSelectedAsset(null); }}>
                         <sphereGeometry args={[99, 64, 64]} />
-                        <meshStandardMaterial color="#0f172a" roughness={0.8} metalness={0.2} />
+                        <meshStandardMaterial color="#112231" roughness={0.8} metalness={0.2} />
                     </mesh>
 
                     <PlanetBorders />
@@ -515,8 +621,8 @@ const PlanetPage = () => {
                     {isLoadingSegment !== null && (
                         <Html position={[0, 0, 0]} center>
                             <div className="flex flex-col items-center justify-center pointer-events-none">
-                                <Loader2 className="animate-spin text-indigo-400 w-12 h-12" />
-                                <span className="text-indigo-200 text-sm font-bold mt-2 bg-black/50 px-2 rounded">Generating...</span>
+                                <Loader2 className="h-12 w-12 animate-spin text-teal-300" />
+                                <span className="mt-2 rounded bg-black/55 px-2 text-sm font-bold text-teal-100">Generating...</span>
                             </div>
                         </Html>
                     )}
@@ -557,44 +663,46 @@ const PlanetPage = () => {
                     <Environment preset="city" />
                 </Canvas>
 
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70rem_35rem_at_10%_100%,rgba(20,184,166,0.14),transparent_60%),radial-gradient(60rem_35rem_at_100%_0%,rgba(245,158,11,0.12),transparent_55%)]" />
+
                 <AnimatePresence>
-                    {username !== "Guest" && (
+                    {!isGuest && (
                         <motion.div
                             initial={{ x: -20, opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
                             exit={{ x: -20, opacity: 0 }}
-                            className={`absolute top-24 ${isSidebarOpen ? 'left-[370px]' : 'left-10'} z-40 w-[360px] bg-black/60 backdrop-blur-2xl border border-indigo-500/30 rounded-3xl p-6 shadow-[0_0_50px_-10px_rgba(79,70,229,0.3)]`}
+                            className={`absolute top-24 ${summaryPanelLeft} z-40 w-[min(92vw,370px)] rounded-3xl border border-white/15 bg-black/62 p-4 shadow-2xl backdrop-blur-2xl md:p-5`}
                         >
                             {isLoadingPlanet ? (
                                 <div className="flex items-center gap-2">
-                                    <Loader2 className="animate-spin text-indigo-400" size={16} />
-                                    <span className="text-indigo-200 text-sm">Loading Planet Data...</span>
+                                    <Loader2 className="animate-spin text-teal-300" size={16} />
+                                    <span className="text-sm text-teal-100">Loading Planet Data...</span>
                                 </div>
                             ) : planetData ? (
                                 <>
-                                    <h2 className="text-indigo-400 text-sm font-bold tracking-widest uppercase mb-1">PLANET PERSONA</h2>
-                                    <h1 className="text-3xl font-black text-white mb-2 leading-tight">{planetData.persona.split('(')[0]}</h1>
+                                    <h2 className="mb-1 text-xs font-bold uppercase tracking-widest text-teal-300">PLANET PERSONA</h2>
+                                    <h1 className="mb-2 text-2xl font-black leading-tight text-white md:text-3xl">{planetData.persona.split('(')[0]}</h1>
                                     {planetData.persona.includes('(') && (
-                                        <span className="text-white/50 text-sm font-mono block mb-4">{planetData.persona.match(/\((.*?)\)/)?.[1]}</span>
+                                        <span className="mb-4 block text-sm font-mono text-white/50">{planetData.persona.match(/\((.*?)\)/)?.[1]}</span>
                                     )}
 
-                                    <div className="flex gap-4 border-t border-white/10 pt-4">
+                                    <div className="grid grid-cols-3 gap-3 border-t border-white/10 pt-4">
                                         <div>
-                                            <div className="text-xs text-gray-400 uppercase">Contribution</div>
+                                            <div className="text-[11px] uppercase text-white/50">Contribution</div>
                                             <div className="text-xl font-bold text-white">{planetData.total_score}</div>
                                         </div>
                                         <div>
-                                            <div className="text-xs text-gray-400 uppercase">Repos</div>
+                                            <div className="text-[11px] uppercase text-white/50">Repos</div>
                                             <div className="text-xl font-bold text-white">{planetData.repositories.length}</div>
                                         </div>
                                         <div>
-                                            <div className="text-xs text-gray-400 uppercase">Theme</div>
-                                            <div className="text-xl font-bold text-indigo-300 capitalize">{planetData.theme.replace('_', ' ')}</div>
+                                            <div className="text-[11px] uppercase text-white/50">Theme</div>
+                                            <div className="text-xl font-bold capitalize text-amber-300">{planetData.theme.replace('_', ' ')}</div>
                                         </div>
                                     </div>
 
                                     <div className="mt-4 border-t border-white/10 pt-4">
-                                        <div className="text-xs text-gray-400 uppercase mb-2">{t('전체 분석', 'Overall Analysis')}</div>
+                                        <div className="mb-2 text-xs uppercase text-white/55">{t('전체 분석', 'Overall Analysis')}</div>
                                         {overallCards.length > 0 ? (
                                             <div className="space-y-3">
                                                 {overallCards.map((card) => (
@@ -626,25 +734,23 @@ const PlanetPage = () => {
                 {/* --- UI Overlays --- */}
 
                 <AnimatePresence>
-                    {focusedSegment !== null && (
+                                    {focusedSegment !== null && (
                         <>
-                            {/* [수정됨] 상단 구역 정보 패널: 우측 상단으로 이동 */}
                             <motion.div
                                 initial={{ opacity: 0, x: 50 }} // 오른쪽에서 스윽 나타나게 변경
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: 50 }}
-                                className="absolute top-24 right-10 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-right z-40 shadow-2xl"
+                                className="absolute right-3 top-24 z-40 w-[min(92vw,420px)] rounded-2xl border border-white/15 bg-black/62 p-4 text-right shadow-2xl backdrop-blur-xl md:right-8 md:p-6"
                             >
-                                <div className="text-indigo-400 text-xs font-bold uppercase tracking-widest mb-2 flex items-center justify-end gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                                <div className="mb-2 flex items-center justify-end gap-2 text-xs font-bold uppercase tracking-widest text-teal-300">
+                                    <span className="h-2 w-2 animate-pulse rounded-full bg-teal-300" />
                                     SECTOR {focusedSegment + 1}
                                 </div>
-                                <h1 className="text-3xl font-black text-white flex items-center justify-end gap-3">
+                                <h1 className="flex items-center justify-end gap-3 text-2xl font-black text-white md:text-3xl">
                                     {repoNames[focusedSegment] || "Unknown Repository"}
-                                    <Database size={24} className="text-gray-400" />
+                                    <Database size={22} className="text-white/50" />
                                 </h1>
-                                {/* 추가 정보: 테마 표시 */}
-                                <div className="text-gray-400 text-sm mt-1 font-mono">
+                                <div className="mt-1 text-sm font-mono text-white/50">
                                     {segmentConfigs[focusedSegment]?.theme?.replace('_', ' ') || 'ANALYZING...'}
                                 </div>
 
@@ -677,16 +783,15 @@ const PlanetPage = () => {
                                 </div>
                             </motion.div>
 
-                            {/* 하단 뒤로가기 버튼 (그대로 유지) */}
                             <motion.button
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: 20 }}
                                 onClick={() => { setFocusedSegment(null); setSelectedAsset(null); }}
-                                className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-full backdrop-blur-md border border-white/20 font-bold shadow-2xl transition-all z-50"
+                                className="absolute bottom-20 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/20 bg-black/55 px-6 py-2.5 font-bold text-white shadow-2xl backdrop-blur-md transition-all hover:bg-black/70 md:px-8 md:py-3"
                             >
                                 <ArrowLeft size={20} />
-                                <span>Return to Orbit</span>
+                                <span>{t('궤도로 돌아가기', 'Return to Orbit')}</span>
                             </motion.button>
                         </>
                     )}
@@ -698,28 +803,28 @@ const PlanetPage = () => {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="absolute right-10 top-1/2 -translate-y-1/2 w-80 bg-black/80 backdrop-blur-2xl border border-indigo-500/30 rounded-3xl p-6 z-50 shadow-2xl"
+                            className="absolute bottom-22 left-3 right-3 z-50 rounded-3xl border border-white/15 bg-black/82 p-4 shadow-2xl backdrop-blur-2xl md:bottom-auto md:left-auto md:right-8 md:top-1/2 md:w-80 md:-translate-y-1/2 md:p-6"
                         >
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="p-3 bg-indigo-500/20 rounded-2xl">
-                                    <GitCommit className="text-indigo-400" size={24} />
+                            <div className="mb-4 flex items-start justify-between">
+                                <div className="rounded-2xl bg-teal-400/20 p-3">
+                                    <GitCommit className="text-teal-300" size={24} />
                                 </div>
-                                <button onClick={() => setSelectedAsset(null)} className="text-gray-500 hover:text-white"><X size={20} /></button>
+                                <button onClick={() => setSelectedAsset(null)} className="text-white/40 hover:text-white"><X size={20} /></button>
                             </div>
-                            <h3 className="text-white font-bold text-sm mb-1 break-all">{selectedAsset.sourceCommitId}</h3>
-                            <div className="text-indigo-400 text-xs font-mono mb-4 uppercase tracking-wider">{selectedAsset.type.replace('_', ' ')}</div>
-                            <div className="bg-white/5 p-3 rounded-xl border border-white/5">
-                                <p className="text-gray-300 text-sm italic">{selectedAsset.type.includes('feat') ? "Implemented new feature" : "Update committed"}</p>
+                            <h3 className="mb-1 break-all text-sm font-bold text-white">{selectedAsset.sourceCommitId}</h3>
+                            <div className="mb-4 text-xs font-mono uppercase tracking-wider text-teal-300">{selectedAsset.type.replace('_', ' ')}</div>
+                            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                                <p className="text-sm italic text-white/75">{selectedAsset.type.includes('feat') ? "Implemented new feature" : "Update committed"}</p>
                             </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
 
-                <div className="absolute bottom-8 right-8 flex gap-4 z-30">
+                <div className="absolute bottom-4 left-1/2 z-30 flex w-[calc(100%-1.5rem)] max-w-2xl -translate-x-1/2 flex-col gap-2 sm:flex-row">
                     <button
                         onClick={handleAnalyze}
-                        disabled={isAnalyzing || isMockMode || username === "Guest" || assignedRepos.length === 0}
-                        className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl backdrop-blur-md border border-white/10 font-bold disabled:cursor-not-allowed disabled:opacity-60"
+                        disabled={isAnalyzing || isMockMode || isGuest || assignedRepos.length === 0}
+                        className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-amber-300/35 bg-amber-400 px-5 py-3 font-bold text-slate-900 backdrop-blur-md transition-colors hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         {isAnalyzing ? (
                             <span className="flex items-center gap-2">
@@ -727,15 +832,19 @@ const PlanetPage = () => {
                                 {t('분석 중...', 'Analyzing...')}
                             </span>
                         ) : (
-                            t('분석 생성', 'ANALYZE')
+                            <>
+                                <Sparkles size={17} />
+                                {t('분석 생성', 'ANALYZE')}
+                            </>
                         )}
                     </button>
 
                     <button
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                        className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl backdrop-blur-md border border-white/10 font-bold"
+                        className="flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-black/55 px-5 py-3 font-bold text-white transition-colors hover:bg-black/70 sm:min-w-[210px]"
                     >
-                        {isSidebarOpen ? "Hide Repos" : "Show Repos"}
+                        {isSidebarOpen ? <PanelLeftClose size={17} /> : <PanelLeftOpen size={17} />}
+                        {isSidebarOpen ? t('레포 숨기기', 'Hide Repos') : t('레포 보기', 'Show Repos')}
                     </button>
                 </div>
             </main>

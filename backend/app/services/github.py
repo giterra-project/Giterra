@@ -1,13 +1,15 @@
-import httpx
-import httpx
 import asyncio
 import logging
-from datetime import datetime
-from app.schemas import AnalyzeRequest
-from app.schemas import RepoInfo
-from fastapi import HTTPException
 from collections import Counter
+from datetime import datetime
+import httpx
+from fastapi import HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select
 from app.core.config import settings
+from app.models import User, Repository, UserProfile
+from app.schemas import AnalyzeDirectRequest, AnalyzeRequest, RepoInfo
+from app.services.graph import langgraph_app
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
@@ -26,6 +28,155 @@ KEYWORD_MAP = {
     "test": ["test", "testing", "spec", "테스트"],
     "chore": ["chore", "build", "config", "setting", "설정", "배포"]
 }
+
+WEIGHTS = {
+    "feat": 1.0,
+    "refactor": 3.0,
+    "test": 4.0,
+    "fix": 4.0,
+    "docs": 4.0,
+    "chore": 1.0,
+}
+
+PERSONA_MAP = {
+    "future_city": "미래 도시 숲 (Future City)",
+    "lab_dome": "연구소 돔 (Lab Dome)",
+    "primitive_forest": "원시의 숲 (Primitive Forest)",
+    "start_tree": "시작의 나무 (Start Tree)",
+}
+
+OBJECT_MAPPING = {
+    "future_city": {
+        "feat": "GlassBuilding",
+        "fix": "HologramTree",
+        "refactor": "Hyperloop",
+        "docs": "HologramSign",
+        "chore": "Drone",
+    },
+    "lab_dome": {
+        "feat": "MetalBunker",
+        "fix": "ShieldTurret",
+        "refactor": "PipeLine",
+        "docs": "SatelliteDish",
+        "chore": "Ventilation",
+    },
+    "primitive_forest": {
+        "feat": "GiantTree",
+        "fix": "MossRock",
+        "refactor": "VineBridge",
+        "docs": "AncientRune",
+        "chore": "WildFlower",
+    },
+    "start_tree": {
+        "feat": "Sprout",
+        "fix": "Pebble",
+        "refactor": "SteppingStone",
+        "docs": "Firefly",
+        "chore": "Leaf",
+    },
+}
+
+
+def _dominant_commit_type(commit_stats: dict) -> str:
+    if not commit_stats:
+        return "chore"
+
+    dominant = max(commit_stats, key=commit_stats.get)
+
+    if dominant == "test":
+        return "fix"
+    if dominant not in {"feat", "fix", "refactor", "docs", "chore"}:
+        return "chore"
+
+    return dominant
+
+
+def _calculate_scores_and_theme(total_stats: Counter):
+    scores = {}
+    for key in KEYWORD_MAP.keys():
+        weight = WEIGHTS.get(key, 1.0)
+        scores[key] = round(float(total_stats.get(key, 0)) * weight, 1)
+
+    total_score = round(sum(scores.values()), 1)
+
+    if total_score < 5:
+        theme_key = "start_tree"
+    else:
+        dominant_trait = max(scores, key=scores.get) if scores else "chore"
+        if dominant_trait in ["fix", "test"]:
+            theme_key = "lab_dome"
+        elif dominant_trait in ["refactor", "docs"]:
+            theme_key = "primitive_forest"
+        else:
+            theme_key = "future_city"
+
+    persona = PERSONA_MAP.get(theme_key, PERSONA_MAP["start_tree"])
+    return scores, total_score, theme_key, persona
+
+
+def _object_name(theme_key: str, dominant_type: str) -> str:
+    normalized = "fix" if dominant_type == "test" else dominant_type
+    obj_name = OBJECT_MAPPING.get(theme_key, {}).get(normalized, "Unknown")
+
+    if obj_name == "Unknown":
+        return OBJECT_MAPPING.get(theme_key, {}).get("chore", "Unknown")
+
+    return obj_name
+
+
+def _heuristic_repo_analysis(repo_name: str, dominant_type: str, total_commits: int, top_languages: list[str]):
+    trait_map = {
+        "feat": "기능 확장 중심",
+        "fix": "안정성 개선 중심",
+        "refactor": "구조 개선 중심",
+        "docs": "문서화·지식 정리 중심",
+        "chore": "운영·환경 정비 중심",
+    }
+    trait = trait_map.get(dominant_type, "운영 중심")
+    language_text = ", ".join(top_languages) if top_languages else "언어 정보 없음"
+
+    return {
+        "analysis_summary": (
+            f"{repo_name}는 {trait} 리포지토리입니다. "
+            f"총 {total_commits}개의 최근 커밋 기준으로 분석했으며, "
+            f"주요 언어는 {language_text}입니다."
+        ),
+        "analysis_sub1": (
+            f"기술 관점: {trait} 패턴이 커밋에서 가장 뚜렷합니다. "
+            "핵심 모듈을 작게 분리하고 변경 이력을 PR 단위로 묶으면 확장성이 더 좋아집니다."
+        ),
+        "analysis_sub2": (
+            "안정성 관점: 커밋 단위는 비교적 명확합니다. "
+            "테스트/회귀 체크리스트를 커밋 메시지와 함께 운영하면 품질 관리가 쉬워집니다."
+        ),
+        "analysis_sub3": (
+            "협업 관점: 커밋 prefix(feat/fix/refactor/docs/chore)와 변경 목적을 함께 적으면 "
+            "리뷰 속도와 문맥 공유가 개선됩니다."
+        ),
+    }
+
+
+def _heuristic_overall_analysis(
+    username: str,
+    persona: str,
+    theme_key: str,
+    total_score: float,
+    main_languages: list[str],
+    commit_stats: dict[str, int],
+):
+    languages_text = ", ".join(main_languages) if main_languages else "언어 정보 없음"
+    return (
+        f"{username} 개발 성향 요약\n"
+        f"- Persona: {persona}\n"
+        f"- Theme Key: {theme_key}\n"
+        f"- Weighted Score: {total_score}\n"
+        f"- Main Languages: {languages_text}\n"
+        f"- Commit Distribution: {commit_stats}\n\n"
+        "권장 사항\n"
+        "1. 기능 커밋과 안정화 커밋을 분리해 배포 리스크를 낮추세요.\n"
+        "2. 리팩터링과 문서 커밋을 스프린트 단위로 묶어 유지보수 효율을 올리세요.\n"
+        "3. 커밋 메시지 템플릿을 팀 규칙으로 고정해 협업 속도를 높이세요."
+    )
 
 async def fetch_repo_details(client: httpx.AsyncClient, user: str, repo: str):
     """커밋 로그와 사용 언어를 함께 수집합니다 (유연한 키워드 분석)."""
@@ -114,9 +265,28 @@ async def get_user_repositories(username: str):
             logger.error(f"Network error: {e}")
             raise HTTPException(status_code=503, detail="GitHub API connection failed")
 
-from sqlmodel import select
-from app.models import User, Repository, UserProfile
-from sqlalchemy.ext.asyncio import AsyncSession
+async def get_repo_commits(username: str, repo_name: str, per_page: int = 50):
+    if not GITHUB_TOKEN:
+        raise HTTPException(status_code=500, detail="GITHUB_TOKEN not configured")
+
+    url = f"https://api.github.com/repos/{username}/{repo_name}/commits?per_page={per_page}"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, headers=HEADERS)
+        except httpx.RequestError as e:
+            logger.error(f"Network error while fetching commits for {username}/{repo_name}: {e}")
+            raise HTTPException(status_code=503, detail="GitHub API connection failed")
+
+    if response.status_code == 404:
+        raise HTTPException(status_code=404, detail="Repository not found")
+    if response.status_code == 409:
+        # Empty repository
+        return []
+    if response.status_code != 200:
+        raise HTTPException(status_code=response.status_code, detail="GitHub API Error")
+
+    return response.json()
 
 async def analyze_repo_details(client: httpx.AsyncClient, user: str, repo: str):
     """개별 레포지토리의 상세 정보를 수집하고 가공합니다."""
@@ -171,7 +341,175 @@ async def analyze_repo_details(client: httpx.AsyncClient, user: str, repo: str):
         logger.exception(f"Error analyzing {repo}")
         return {"repo": repo, "error": str(e), "status": "failed"}
 
-from app.services.graph import langgraph_app
+async def analyze_repos_direct(request: AnalyzeDirectRequest):
+    user_name = request.github_username.strip()
+    repo_names = []
+    for repo_name in request.selected_repos:
+        normalized = repo_name.strip()
+        if normalized and normalized not in repo_names:
+            repo_names.append(normalized)
+
+    if not user_name:
+        raise HTTPException(status_code=400, detail="github_username is required")
+    if not repo_names:
+        raise HTTPException(status_code=400, detail="selected_repos is required")
+
+    async with httpx.AsyncClient() as client:
+        tasks = [analyze_repo_details(client, user_name, repo_name) for repo_name in repo_names]
+        results = await asyncio.gather(*tasks)
+
+    total_stats = Counter()
+    total_languages = Counter()
+    failed_repos = []
+    repo_details = {}
+    repo_inputs = []
+
+    for result in results:
+        repo_name = result.get("repo", "unknown")
+
+        if result.get("status") == "failed":
+            failed_repos.append(repo_name)
+            continue
+
+        commit_stats = result.get("commit_stats") or {}
+        languages = result.get("languages") or {}
+        dominant_type = _dominant_commit_type(commit_stats)
+
+        total_stats.update(commit_stats)
+        total_languages.update(languages)
+
+        repo_details[repo_name] = {
+            "total_commits": int(result.get("total_commits", 0)),
+            "dominant_type": dominant_type,
+            "latest_commit": result.get("latest_commit_date"),
+            "languages": languages,
+            "commit_messages": result.get("commit_messages", []),
+        }
+
+        repo_inputs.append({
+            "repo_name": repo_name,
+            "commits": result.get("commit_messages", []),
+        })
+
+    if not repo_details:
+        raise HTTPException(status_code=500, detail="Failed to fetch data for selected repositories")
+
+    scores, total_score, theme_key, persona = _calculate_scores_and_theme(total_stats)
+    main_languages = [lang for lang, _ in total_languages.most_common(3)]
+    commit_stats = {key: int(total_stats.get(key, 0)) for key in KEYWORD_MAP.keys()}
+    analysis_source = "heuristic"
+
+    overall_analysis = _heuristic_overall_analysis(
+        username=user_name,
+        persona=persona,
+        theme_key=theme_key,
+        total_score=total_score,
+        main_languages=main_languages,
+        commit_stats=commit_stats,
+    )
+
+    ai_by_repo = {}
+    if repo_inputs:
+        try:
+            ai_result = await langgraph_app.ainvoke(
+                {
+                    "github_username": user_name,
+                    "repos_input": repo_inputs,
+                }
+            )
+
+            final_persona = ai_result.get("final_persona")
+            repo_analyses = ai_result.get("repo_analyses", [])
+
+            for item in repo_analyses:
+                if hasattr(item, "repo_name"):
+                    repo_name = item.repo_name
+                    ai_by_repo[repo_name] = {
+                        "analysis_summary": item.summary,
+                        "analysis_sub1": item.tech_view,
+                        "analysis_sub2": item.stability_view,
+                        "analysis_sub3": item.comm_view,
+                    }
+                elif isinstance(item, dict):
+                    repo_name = item.get("repo_name")
+                    if repo_name:
+                        ai_by_repo[repo_name] = {
+                            "analysis_summary": item.get("summary", ""),
+                            "analysis_sub1": item.get("tech_view", ""),
+                            "analysis_sub2": item.get("stability_view", ""),
+                            "analysis_sub3": item.get("comm_view", ""),
+                        }
+
+            if isinstance(final_persona, str) and final_persona.strip():
+                overall_analysis = final_persona
+
+            if ai_by_repo or (isinstance(final_persona, str) and final_persona.strip()):
+                analysis_source = "llm"
+        except Exception:
+            logger.exception("Direct analysis failed with LLM, fallback to heuristic")
+
+    repositories = []
+    for repo_name in repo_names:
+        detail = repo_details.get(repo_name)
+        if not detail:
+            continue
+
+        top_languages = sorted(
+            detail["languages"].items(),
+            key=lambda item: item[1],
+            reverse=True,
+        )
+        top_languages = [lang for lang, _ in top_languages[:3]]
+        dominant_type = detail["dominant_type"]
+        building_type = _object_name(theme_key, dominant_type)
+
+        ai_data = ai_by_repo.get(repo_name)
+        if not ai_data:
+            ai_data = _heuristic_repo_analysis(
+                repo_name=repo_name,
+                dominant_type=dominant_type,
+                total_commits=detail["total_commits"],
+                top_languages=top_languages,
+            )
+
+        latest_commit = detail["latest_commit"]
+        latest_commit_iso = latest_commit.isoformat() if latest_commit else None
+
+        repositories.append(
+            {
+                "repo_name": repo_name,
+                "total_commits": detail["total_commits"],
+                "dominant_type": dominant_type,
+                "building_type": building_type,
+                "top_languages": top_languages,
+                "latest_commit": latest_commit_iso,
+                "analysis_summary": ai_data["analysis_summary"],
+                "analysis_sub1": ai_data["analysis_sub1"],
+                "analysis_sub2": ai_data["analysis_sub2"],
+                "analysis_sub3": ai_data["analysis_sub3"],
+            }
+        )
+
+    mode = request.mode if request.mode in ["single", "multi"] else ("single" if len(repositories) == 1 else "multi")
+
+    return {
+        "summary": {
+            "username": user_name,
+            "mode": mode,
+            "repo_count": len(repositories),
+            "persona": persona,
+            "theme": theme_key,
+            "main_languages": main_languages,
+            "total_score": total_score,
+            "commit_stats": commit_stats,
+            "weighted_scores": scores,
+            "overall_analysis": overall_analysis,
+            "analysis_source": analysis_source,
+            "generated_at": datetime.now().isoformat(),
+        },
+        "repositories": repositories,
+        "failed_repositories": failed_repos,
+    }
 
 async def analyze_selected_repos(request: AnalyzeRequest, db: AsyncSession):
     user_name = request.github_username

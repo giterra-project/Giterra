@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_session
+from app.dependencies import get_current_user
 from app.models import User, Repository, UserProfile
 from typing import List, Optional
 from pydantic import BaseModel
@@ -34,7 +35,14 @@ class PlanetResponse(BaseModel):
     repositories: List[RepoDetail]
 
 @router.get("/{username}", response_model=PlanetResponse)
-async def get_planet_data(username: str, db: AsyncSession = Depends(get_session)):
+async def get_planet_data(
+    username: str,
+    db: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    if username != current_user.username:
+        raise HTTPException(status_code=403, detail="You can only view your own planet data")
+
     # 1. 유저 조회
     statement = select(User).where(User.username == username)
     result = await db.execute(statement)

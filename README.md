@@ -1,3 +1,56 @@
+# Giterra
+
+## 빠른 시작 (서버 실행)
+
+### 1) 데이터베이스 실행 (Docker)
+
+```bash
+docker start giterra_db_alt || \
+docker run -d --name giterra_db_alt \
+  -e POSTGRES_USER=myuser \
+  -e POSTGRES_PASSWORD=mypassword \
+  -e POSTGRES_DB=giterra \
+  -p 5433:5432 postgres:15-alpine
+```
+
+### 2) 백엔드 실행
+
+```bash
+cd backend
+uv sync
+uv run uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+### 3) 프론트엔드 실행
+
+```bash
+cd frontend
+npm install
+npm run dev -- --host 0.0.0.0 --port 3000
+```
+
+### 4) 접속 주소
+
+- Frontend: `http://localhost:3000`
+- Backend: `http://localhost:8000`
+- Swagger: `http://localhost:8000/docs`
+
+## 빌드 체크
+
+### Backend
+
+```bash
+cd backend
+uv run python -m compileall app main.py
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm run build
+```
+
 # 최종 역할 분담 (확정)
 
 ### 🎨 Frontend (2명)
