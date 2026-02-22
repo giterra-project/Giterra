@@ -47,7 +47,9 @@ const MyPage = () => {
 
     const handleLogout = () => {
         clearAuth();
-        navigate('/');
+        const returnTo = `${window.location.origin}/`;
+        const githubLogoutUrl = `https://github.com/logout?return_to=${encodeURIComponent(returnTo)}`;
+        window.location.href = githubLogoutUrl;
     };
 
     return (
