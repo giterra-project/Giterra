@@ -8,14 +8,16 @@ from app.schemas import RepoInfo
 from fastapi import HTTPException
 from collections import Counter
 from app.core.config import settings
+from sqlmodel import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.models import User, Repository
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-GITHUB_TOKEN = settings.GITHUB_TOKEN
-HEADERS = settings.GITHUB_HEADERS
+# 전역 토큰 지양 (사용자별 토큰 사용 권장)
 
 # 분석할 키워드 맵
 KEYWORD_MAP = {
@@ -27,15 +29,15 @@ KEYWORD_MAP = {
     "chore": ["chore", "build", "config", "setting", "설정", "배포"]
 }
 
-async def fetch_repo_details(client: httpx.AsyncClient, user: str, repo: str):
-    """커밋 로그와 사용 언어를 함께 수집합니다 (유연한 키워드 분석)."""
+async def fetch_repo_details(client: httpx.AsyncClient, user: str, repo: str, headers: dict):
+    """커밋 로그와 사용 언어를 함께 수집합니다."""
     commit_url = f"https://api.github.com/repos/{user}/{repo}/commits?per_page=50"
     lang_url = f"https://api.github.com/repos/{user}/{repo}/languages"
     
     try:
         commit_res, lang_res = await asyncio.gather(
-            client.get(commit_url, headers=HEADERS),
-            client.get(lang_url, headers=HEADERS),
+            client.get(commit_url, headers=headers),
+            client.get(lang_url, headers=headers),
             return_exceptions=True
         )
 
@@ -81,14 +83,26 @@ async def fetch_repo_details(client: httpx.AsyncClient, user: str, repo: str):
         logger.exception(f"Unexpected error analyzing {repo}")
         return {"repo": repo, "error": str(e), "status": "failed"}
 
-async def get_user_repositories(username: str):
-    if not GITHUB_TOKEN:
-        raise HTTPException(status_code=500, detail="GITHUB_TOKEN not configured")
+async def get_user_repositories(username: str, db: AsyncSession):
+    # 1. DB에서 사용자 토큰 조회
+    statement = select(User).where(User.username == username)
+    result = await db.execute(statement)
+    db_user = result.scalars().first()
     
+    if not db_user or not db_user.access_token:
+        # DB에 토큰이 없으면 서버 공용 토큰으로 시도 (Public 레포 한정)
+        logger.warning(f"No access token for {username}, falling back to server token")
+        headers = settings.GITHUB_HEADERS
+    else:
+        headers = {
+            "Authorization": f"token {db_user.access_token}",
+            "Accept": "application/vnd.github.v3+json"
+        }
+
     async with httpx.AsyncClient() as client:
         try:
             url = f"https://api.github.com/users/{username}/repos?sort=updated&per_page=100"
-            response = await client.get(url, headers=HEADERS)
+            response = await client.get(url, headers=headers)
             
             if response.status_code == 404:
                 raise HTTPException(status_code=404, detail="User not found")
@@ -114,19 +128,17 @@ async def get_user_repositories(username: str):
             logger.error(f"Network error: {e}")
             raise HTTPException(status_code=503, detail="GitHub API connection failed")
 
-from sqlmodel import select
-from app.models import User, Repository
-from sqlalchemy.ext.asyncio import AsyncSession
 
-async def analyze_repo_details(client: httpx.AsyncClient, user: str, repo: str):
+
+async def analyze_repo_details(client: httpx.AsyncClient, user: str, repo: str, headers: dict):
     """개별 레포지토리의 상세 정보를 수집하고 가공합니다."""
     commit_url = f"https://api.github.com/repos/{user}/{repo}/commits?per_page=50"
     lang_url = f"https://api.github.com/repos/{user}/{repo}/languages"
     
     try:
         commit_res, lang_res = await asyncio.gather(
-            client.get(commit_url, headers=HEADERS),
-            client.get(lang_url, headers=HEADERS),
+            client.get(commit_url, headers=headers),
+            client.get(lang_url, headers=headers),
             return_exceptions=True
         )
 
@@ -181,8 +193,14 @@ async def analyze_selected_repos(request: AnalyzeRequest, db: AsyncSession):
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found in DB. Please login first.")
 
+    # 2. 사용자 토큰으로 헤더 구성
+    user_headers = {
+        "Authorization": f"token {db_user.access_token}",
+        "Accept": "application/vnd.github.v3+json"
+    }
+
     async with httpx.AsyncClient() as client:
-        tasks = [analyze_repo_details(client, user_name, repo) for repo in repo_names]
+        tasks = [analyze_repo_details(client, user_name, repo, user_headers) for repo in repo_names]
         results = await asyncio.gather(*tasks)
 
         # 전체 통계 합산 및 개별 저장
