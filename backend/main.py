@@ -1,4 +1,11 @@
-from fastapi import FastAPI
+import asyncio
+import sys
+
+# Windows에서 asyncpg 호환성 (ProactorEventLoop → SelectorEventLoop)
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 # from app.services.graph import langgraph_app 제미나이 API 키 있어야함
 from app.routers import repo
@@ -10,13 +17,24 @@ from contextlib import asynccontextmanager
 from app.database import init_db
 import app.models as models # 모델들을 임포트해야 테이블이 생성됩니다.
 
+from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
+from fastapi.security import APIKeyHeader
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 서버 기동 시 DB 테이블 생성
     await init_db()
     yield
 
-app = FastAPI(title="Giterra Backend", lifespan=lifespan)
+# Swagger UI 보안 설정 (자물쇠 버튼 추가)
+api_key_header = APIKeyHeader(name="Authorization", auto_error=False)
+
+app = FastAPI(
+    title="Giterra Backend", 
+    lifespan=lifespan,
+    dependencies=[Depends(api_key_header)], # 전역 의존성 추가로 Swagger 자물쇠 활성화
+    swagger_ui_parameters={"persistAuthorization": True}
+)
 
 # CORS 설정
 app.add_middleware(
