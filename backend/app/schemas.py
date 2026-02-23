@@ -1,5 +1,15 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Generic, TypeVar
+
+
+# 1. 제네릭 타입 변수 T 선언 (어떤 데이터든 들어올 수 있다는 뜻)
+T = TypeVar("T")
+
+# 2. 만능 껍데기 BaseResponse 정의
+class BaseResponse(BaseModel, Generic[T]):
+    code: int
+    message: str
+    data: Optional[T] = None 
 
 # --- 1. 데이터 모델 정의 (Pydantic) ---
 
@@ -23,3 +33,20 @@ class RepoInfo(BaseModel):
     language: Optional[str]
     url: str
     updated_at: str
+
+# 1. 가장 안쪽 데이터: 행성(레포지토리) 정보
+class PlanetInfo(BaseModel):
+    repoId: int
+    repoName: str
+    repoURL: str
+    description: Optional[str] = None # 설명이 없는 레포도 있으니 Optional 처리
+
+class MyRepositories(BaseModel): 
+    repos: list[PlanetInfo]
+
+# 2. 중간 데이터: 유저 프로필 본문
+class UserProfileData(BaseModel):
+    userId: int
+    username: str
+    githubURL: str
+    planets: List[PlanetInfo]
