@@ -9,7 +9,7 @@ DATABASE_URL = settings.DATABASE_URL
 engine = create_async_engine(
     DATABASE_URL, 
     echo=True, 
-    future=True, 
+    future=True,
 )
 
 # 비동기 세션 생성기
