@@ -50,3 +50,16 @@ class UserProfileData(BaseModel):
     username: str
     githubURL: str
     planets: List[PlanetInfo]
+
+class RepositoryResult(BaseModel): 
+    repoName: str
+    repoURL: str
+    planetType: str
+    repoSummary: str
+    aspect_1: str
+    aspect_2: str
+    aspect_3: str
+
+class AnalyzeResult(BaseModel): 
+    summary: str
+    repos: List[RepositoryResult]

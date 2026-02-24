@@ -178,9 +178,9 @@ async def analyze_repo_details(client: httpx.AsyncClient, user: str, repo: str, 
         logger.exception(f"Error analyzing {repo}")
         return {"repo": repo, "error": str(e), "status": "failed"}
 
-async def analyze_selected_repos(request: AnalyzeRequest, db: AsyncSession):
-    user_name = request.github_username
-    repo_names = request.selected_repos
+async def analyze_selected_repos(db: AsyncSession, current_user: User):
+    user_name = current_user.username
+    repo_names = ["example"] # TODO: DB에서 등록해둔 8개의 레포지토리 가져오기
 
     if not repo_names:
         raise HTTPException(status_code=400, detail="No repos selected")
@@ -301,3 +301,7 @@ async def analyze_selected_repos(request: AnalyzeRequest, db: AsyncSession):
             },
             "detailed_results": results
         }
+
+# TODO: 새로 분석이니 이미 저장된 레포지토리들로 바로 분석 시작, 분석 로직은 위랑 같다
+async def refresh_analyze_repos(db: AsyncSession, current_user: User):
+    return None
