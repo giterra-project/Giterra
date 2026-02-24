@@ -108,7 +108,7 @@ async def get_my_info(current_user: User = Depends(get_current_user)):
     """보안 요원(Depends)이 검증해준 유저 정보를 바로 반환"""
     return {
         "id": current_user.github_id,
-        "username": current_user.username,
+        "login": current_user.username,
         "avatar_url": current_user.avatar_url,
         "html_url": current_user.html_url
     }
