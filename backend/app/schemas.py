@@ -23,3 +23,19 @@ class RepoInfo(BaseModel):
     language: Optional[str]
     url: str
     updated_at: str
+
+# --- 2. 행성 배치 관련 (Planet Placement) ---
+
+class PlanetPlacementItem(BaseModel):
+    repo_id: int
+    slot_index: int
+    planet_type: str
+
+class PlanetPlacementRequest(BaseModel):
+    placements: List[PlanetPlacementItem]
+    mode: str = "replace" # 기본값 replace
+
+class PlanetPlacementResponse(BaseModel):
+    code: int = 200
+    message: str = "placements updated"
+    data: dict

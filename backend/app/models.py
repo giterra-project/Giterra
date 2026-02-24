@@ -42,7 +42,8 @@ class Placement(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="users.id")
     repo_id: int = Field(foreign_key="repositories.id", unique=True)
-    slot_index: int # 0~7번 구역 인덱스
+    slot_index: int  # 0~7번 슬롯 인덱스
+    planet_type: str # 수성, 금성, 지구, 화성, 목성, 토성, 천왕성, 해왕성
     
     # 관계 설정
     user: User = Relationship(back_populates="placements")
