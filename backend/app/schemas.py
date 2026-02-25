@@ -37,12 +37,18 @@ class RepoInfo(BaseModel):
 # 1. 가장 안쪽 데이터: 행성(레포지토리) 정보
 class PlanetInfo(BaseModel):
     repoId: int
+    slot: int
     repoName: str
     repoURL: str
     description: Optional[str] = None # 설명이 없는 레포도 있으니 Optional 처리
 
+class RepoListInfo(BaseModel): 
+    repoName: str
+    repoURL: str
+    description: Optional[str] = None
+
 class MyRepositories(BaseModel): 
-    repos: list[PlanetInfo]
+    repos: list[RepoListInfo]
 
 # 2. 중간 데이터: 유저 프로필 본문
 class UserProfileData(BaseModel):
@@ -50,6 +56,9 @@ class UserProfileData(BaseModel):
     username: str
     githubURL: str
     planets: List[PlanetInfo]
+
+class UpdatePlanetRequest(BaseModel): 
+    repos: List[str]
 
 class RepositoryResult(BaseModel): 
     repoName: str

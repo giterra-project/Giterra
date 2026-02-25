@@ -6,14 +6,15 @@ class User(SQLModel, table=True):
     __tablename__ = "users"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    username: str = Field(unique=True, index=True) # Github ID
+    github_id: str = Field(unique=True, index=True) # 깃허브 ID (중복불가)
+    username: str # 유저 닉네임
     avatar_url: Optional[str] = None
     html_url: Optional[str] = None
     access_token: Optional[str] = None
     
     # 관계 설정
     repositories: List["Repository"] = Relationship(back_populates="owner")
-    placements: List["Planet"] = Relationship(back_populates="user")
+    planets: List["Planet"] = Relationship(back_populates="user")
 
 class Repository(SQLModel, table=True):
     __tablename__ = "repositories"
@@ -33,10 +34,10 @@ class Repository(SQLModel, table=True):
     
     # 관계 설정
     owner: User = Relationship(back_populates="repositories")
-    planets: Optional["Planet"] = Relationship(back_populates="repository")
+    planet: Optional["Planet"] = Relationship(back_populates="repository")
 
 class Planet(SQLModel, table=True):
-    __tablename__ = "Planets"
+    __tablename__ = "planets"
     
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="users.id")
@@ -45,4 +46,4 @@ class Planet(SQLModel, table=True):
     
     # 관계 설정
     user: User = Relationship(back_populates="planets")
-    repository: Repository = Relationship(back_populates="planets")
+    repository: Repository = Relationship(back_populates="planet")

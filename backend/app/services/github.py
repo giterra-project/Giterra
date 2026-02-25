@@ -218,7 +218,7 @@ async def analyze_selected_repos(db: AsyncSession, current_user: User):
             
             # 개별 레포지토리 DB 저장/업데이트
             repo_name = r["repo"]
-            repo_stmt = select(Repository).where(Repository.user_id == db_user.id, Repository.name == repo_name)
+            repo_stmt = select(Repository).where(Repository.user_id == db_user.id, Repository.repo_name == repo_name)
             repo_res = await db.execute(repo_stmt)
             db_repo = repo_res.scalars().first()
             
