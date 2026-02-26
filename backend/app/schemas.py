@@ -40,16 +40,9 @@ class RepoInfo(BaseModel):
 class PlanetPlacementItem(BaseModel):
     repo_id: int
     slot_index: int
-    planet_type: str
 
 class PlanetPlacementRequest(BaseModel):
     placements: List[PlanetPlacementItem]
-    mode: str = "replace" # 기본값 replace
-
-class PlanetPlacementResponse(BaseModel):
-    code: int = 200
-    message: str = "placements updated"
-    data: dict
 
 # 1. 가장 안쪽 데이터: 행성(레포지토리) 정보
 class PlanetInfo(BaseModel):

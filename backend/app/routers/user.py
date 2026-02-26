@@ -7,14 +7,11 @@ from app.services.github import get_user_repositories
 from sqlmodel import select, delete
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas import BaseResponse, UserProfileData, PlanetInfo, MyRepositories, RepoListInfo, UpdatePlanetRequest, PlanetPlacementRequest, PlanetPlacementResponse
+from app.schemas import BaseResponse, UserProfileData, PlanetInfo, MyRepositories, RepoListInfo, PlanetPlacementRequest
 from datetime import datetime
 
 router = APIRouter()
 
-VALID_PLANETS = {"수성", "금성", "지구", "화성", "목성", "토성", "천왕성", "해왕성"}
-
-# ★ 핵심: response_model에 대괄호[]를 써서 알맹이 타입을 지정합니다.
 @router.get("/profile", response_model=BaseResponse[UserProfileData])
 async def get_user_profile(
     current_user: User = Depends(get_current_user), 
@@ -134,14 +131,13 @@ async def get_user_repositoris(
 
 @router.put("/planets", response_model=BaseResponse[None])
 async def update_user_planets(
-    payload: UpdatePlanetRequest, 
+    payload: PlanetPlacementRequest, 
     current_user: User = Depends(get_current_user), 
     db: AsyncSession = Depends(get_session)
 ): 
-    slots = 0
-    for repo_id in payload.repos: 
+    for place in payload.placements: 
         statement = select(Repository).where(
-            Repository.repo_id == repo_id,
+            Repository.repo_id == place.repo_id,
         )
         result = await db.execute(statement)
         repo = result.scalars().first()
@@ -150,7 +146,21 @@ async def update_user_planets(
         if not repo:
             return BaseResponse(
                 code=404, 
-                message=f"레포지토리 ID: {repo_id} 가 존재하지 않습니다.", 
+                message=f"레포지토리 ID: {place.repo_id} 가 존재하지 않습니다.", 
+                data=None
+            )
+        
+        if repo.user_id != current_user.id: 
+            return BaseResponse(
+                code=403, 
+                message=f"레포지토리 ID: {place.repo_id} 를 소유하고 있지 않습니다.", 
+                data=None
+            )
+        
+        if not (0 <= place.slot_index <= 7):
+            return BaseResponse(
+                code=400, 
+                message=f"레포지토리 ID: {place.repo_id} 의 슬롯이 유효하지 않습니다.", 
                 data=None
             )
             
@@ -158,11 +168,10 @@ async def update_user_planets(
         new_planet = Planet(
             user_id=current_user.id, # type: ignore
             repo_id=repo.id, # type: ignore
-            slot_index=slots # 0번부터 차례대로 부여됩니다!
+            slot_index=place.slot_index # 0번부터 차례대로 부여됩니다!
         )
         db.add(new_planet)
         
-        slots += 1 # 다음 슬롯 번호로 이동
 
     await db.commit()
 
@@ -171,87 +180,3 @@ async def update_user_planets(
         message="행성 업데이트에 성공했습니다.", 
         data=None
     )
-
-# @router.put("/planets", response_model=PlanetPlacementResponse)
-# async def update_user_planets(
-#     payload: PlanetPlacementRequest,
-#     current_user: User = Depends(get_current_user),
-#     db: AsyncSession = Depends(get_session)
-# ):
-#     errors = []
-    
-#     # 1. 검증 (Validation)
-#     validated_placements = []
-#     requested_repo_ids = [p.repo_id for p in payload.placements]
-    
-#     # 해당 유저가 소유한 레포지토리인지 확인
-#     statement = select(Repository).where(
-#         Repository.id.in_(requested_repo_ids),
-#         Repository.user_id == current_user.id
-#     )
-#     result = await db.execute(statement)
-#     owned_repos = {repo.id for repo in result.scalars().all()}
-    
-#     for item in payload.placements:
-#         # repo_id 권한 확인
-#         if item.repo_id not in owned_repos:
-#             errors.append({
-#                 "field": "repo_id",
-#                 "value": item.repo_id,
-#                 "reason": "Repository not found or access denied"
-#             })
-#             continue
-            
-#         # slot_index 범위 확인 (0~7)
-#         if not (0 <= item.slot_index <= 7):
-#             errors.append({
-#                 "field": "slot_index",
-#                 "value": item.slot_index,
-#                 "reason": "slot_index must be between 0 and 7"
-#             })
-            
-#         # planet_type 유효성 확인
-#         if item.planet_type not in VALID_PLANETS:
-#             errors.append({
-#                 "field": "planet_type",
-#                 "value": item.planet_type,
-#                 "reason": "invalid planet_type"
-#             })
-            
-#     if errors:
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail={"code": 400, "message": "validation failed", "errors": errors}
-#         )
-    
-#     # 2. DB 반영 (Atomic)
-#     try:
-#         if payload.mode == "replace":
-#             # 기존 배치 삭제 (해당 유저의 모든 배치)
-#             delete_stmt = delete(Planet).where(Planet.user_id == current_user.id)
-#             await db.execute(delete_stmt)
-            
-#             # 새로운 배치 추가
-#             for item in payload.placements:
-#                 new_placement = Planet(
-#                     user_id=current_user.id,
-#                     repo_id=item.repo_id,
-#                     slot_index=item.slot_index,
-#                     planet_type=item.planet_type
-#                 )
-#                 db.add(new_placement)
-        
-#         await db.commit()
-#     except Exception as e:
-#         await db.rollback()
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             detail=f"Database error: {str(e)}"
-#         )
-        
-#     # 결과 반환
-#     return PlanetPlacementResponse(
-#         code=200,
-#         message="placements updated",
-#         data={"placements": [item.dict() for item in payload.placements]}
-#     )
