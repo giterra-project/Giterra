@@ -111,6 +111,7 @@ async def get_user_repositories(username: str, db: AsyncSession):
             
             repos = [
                 RepoInfo(
+                    repo_id=r['id'], 
                     name=r['name'],
                     description=r['description'],
                     stars=r['stargazers_count'],

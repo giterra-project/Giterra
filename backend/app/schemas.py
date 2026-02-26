@@ -27,6 +27,7 @@ class RepoAnalysisResult(BaseModel):
     summary: str = Field(description="이 레포지토리의 종합 요약")
 
 class RepoInfo(BaseModel):
+    repo_id: int
     name: str
     description: Optional[str]
     stars: int
@@ -59,6 +60,7 @@ class PlanetInfo(BaseModel):
     description: Optional[str] = None # 설명이 없는 레포도 있으니 Optional 처리
 
 class RepoListInfo(BaseModel): 
+    repoId: int
     repoName: str
     repoURL: str
     description: Optional[str] = None

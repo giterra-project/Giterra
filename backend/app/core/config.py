@@ -38,5 +38,11 @@ class Settings:
             "Authorization": f"token {self.GITHUB_TOKEN}",
             "Accept": "application/vnd.github.v3+json"
         }
+    
+    def get_github_headers(self, token: str) -> dict:
+        return {
+            "Authorization": f"Bearer {token}", 
+            "Accept": "application/vnd.github.v3+json"
+        }
 
 settings = Settings()

@@ -20,8 +20,10 @@ class Repository(SQLModel, table=True):
     __tablename__ = "repositories"
     
     id: Optional[int] = Field(default=None, primary_key=True)
+    repo_id: int # Github상 레포지토리 고유번호
     user_id: int = Field(foreign_key="users.id")
     repo_name: str # 레포지토리 이름
+    html_url: str # 레포지토리 url
     description: Optional[str] = None # 레포지토리 설명
     planet_type: Optional[str] = None # 보여질 행성타입: [수성, 금성, 지구, 화성, 목성, 토성, 천왕성, 해왕성]
     analysis_summary: Optional[str] = Field(default=None) # 분석 요약
