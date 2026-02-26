@@ -9,8 +9,6 @@ from typing import List
 
 router = APIRouter()
 
-VALID_PLANETS = {"수성", "금성", "지구", "화성", "목성", "토성", "천왕성", "해왕성"}
-
 @router.put("/planets", response_model=PlanetPlacementResponse)
 async def update_user_planets(
     payload: PlanetPlacementRequest,
@@ -23,13 +21,13 @@ async def update_user_planets(
     validated_placements = []
     requested_repo_ids = [p.repo_id for p in payload.placements]
     
-    # 해당 유저가 소유한 레포지토리인지 확인
+    # 해당 유저가 소유한 레포지토리인지 확인 및 분석 정보(type) 가져오기
     statement = select(Repository).where(
         Repository.id.in_(requested_repo_ids),
         Repository.user_id == current_user.id
     )
     result = await db.execute(statement)
-    owned_repos = {repo.id for repo in result.scalars().all()}
+    owned_repos = {repo.id: repo.analysis_type for repo in result.scalars().all()}
     
     for item in payload.placements:
         # repo_id 권한 확인
@@ -47,14 +45,6 @@ async def update_user_planets(
                 "field": "slot_index",
                 "value": item.slot_index,
                 "reason": "slot_index must be between 0 and 7"
-            })
-            
-        # planet_type 유효성 확인
-        if item.planet_type not in VALID_PLANETS:
-            errors.append({
-                "field": "planet_type",
-                "value": item.planet_type,
-                "reason": "invalid planet_type"
             })
             
     if errors:
@@ -76,7 +66,7 @@ async def update_user_planets(
                     user_id=current_user.id,
                     repo_id=item.repo_id,
                     slot_index=item.slot_index,
-                    planet_type=item.planet_type
+                    planet_type=owned_repos.get(item.repo_id) or "Normal"
                 )
                 db.add(new_placement)
         
@@ -92,5 +82,11 @@ async def update_user_planets(
     return PlanetPlacementResponse(
         code=200,
         message="placements updated",
-        data={"placements": [item.dict() for item in payload.placements]}
+        data={"placements": [
+            {
+                "repo_id": item.repo_id,
+                "slot_index": item.slot_index,
+                "planet_type": owned_repos.get(item.repo_id) or "Normal"
+            } for item in payload.placements
+        ]}
     )

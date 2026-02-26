@@ -8,12 +8,13 @@
 ### 1. DB 모델 변경 (`app/models.py`)
 *   **Placement 테이블 수정**: 각 슬롯(slot_index)에 어떤 행성 타입이 배치되었는지 저장하기 위해 `planet_type` 컬럼을 추가했습니다.
 *   **데이터 필드**:
+    *   **데이터 필드**:
     *   `slot_index`: 0~7 사이의 정수 (행성 배치 위치)
-    *   `planet_type`: 행성 이름 (`수성`, `금성`, `지구`, `화성`, `목성`, `토성`, `천왕성`, `해왕성`)
+    *   `planet_type`: 분석 결과 기반 타입 (예: `Builder`, `Fixer`, `Normal`)
 
 ### 2. API 스케마 정의 (`app/schemas.py`)
 *   프론트엔드와 백엔드 간 일관된 데이터 통신을 위해 Pydantic 모델을 정의했습니다.
-    *   `PlanetPlacementItem`: 개별 행성 배치 정보 (repo_id, slot_index, planet_type)
+    *   `PlanetPlacementItem`: 개별 행성 배치 정보 (repo_id, slot_index) - **행성 타입은 서버에서 자동 결정**
     *   `PlanetPlacementRequest`: 배치 리스트와 저장 모드 (`replace`)
     *   `PlanetPlacementResponse`: 성공 시 반환할 표준 응답 규격
 
@@ -21,8 +22,9 @@
 *   **PUT /user/planets**: 행성 배치 정보를 일괄 저장합니다.
 *   **핵심 로직**:
     *   **권한 검증**: 요청된 `repo_id`가 현재 로그인한 유저의 소유물인지 확인하여 무단 배치를 방지합니다.
-    *   **유효성 검사**: 슬롯 범위(0~7) 및 행성 타입 명칭이 규칙에 맞는지 검사합니다. (위반 시 400 Bad Request)
-    *   **원자적 저장**: `mode: "replace"` 정책에 따라 기존 배치를 삭제하고 새 배치를 저장하는 과정을 단일 트랜잭션으로 처리하여 데이터 무결성을 보장합니다.
+    *   **행성 타입 자동 매핑**: DB에 저장된 각 레포지토리의 분석 결과(`analysis_type`)를 조회하여 `planet_type`으로 자동 지정합니다.
+    *   **유효성 검사**: 슬롯 범위(0~7)가 규칙에 맞는지 검사합니다. (위반 시 400 Bad Request)
+    *   **원자적 저장**: `mode: "replace"` 정책에 따라 기존 배치를 삭제하고 새 배치를 저장하는 과정을 단일 트랜잭션으로 처리합니다.
 
 ### 4. 서버 앱 등록 (`main.py`)
 *   새롭게 생성한 유저 관련 라우터를 `/user` 프리픽스로 등록했습니다. 이제 모든 요청은 `/user/planets`를 통해 접근 가능합니다.
@@ -40,8 +42,8 @@
 ```json
 {
   "placements": [
-    { "repo_id": 101, "slot_index": 0, "planet_type": "수성" },
-    { "repo_id": 102, "slot_index": 3, "planet_type": "지구" }
+    { "repo_id": 101, "slot_index": 0 },
+    { "repo_id": 102, "slot_index": 3 }
   ],
   "mode": "replace"
 }
@@ -53,20 +55,22 @@
   "code": 200,
   "message": "placements updated",
   "data": {
-    "placements": [ ... ]
+    "placements": [
+      { "repo_id": 101, "slot_index": 0, "planet_type": "Builder" },
+      { "repo_id": 102, "slot_index": 3, "planet_type": "Fixer" }
+    ]
   }
 }
 ```
-## 📊 테스트 결과 및 검증 완료 (2026-02-25)
+## 📊 테스트 결과 및 검증 완료 (2026-02-27)
 
 실제 개발 환경에서 백엔드 로직 및 DB 연동 테스트를 완료했습니다.
 
 ### 1. 검증된 시나리오
-*   **성공 (200 OK)**: 유효한 JWT 토큰과 함께 소유한 레포지토리 ID를 전송했을 때 DB에 원자적으로 저장됨을 확인.
+*   **성공 (200 OK)**: 유효한 JWT 토큰과 함께 소유한 레포지토리 ID를 전송했을 때 DB에 원자적으로 저장됨을 확인. (행성 타입 자동 지정 포함)
 *   **인증 실패 (401 Unauthorized)**: 토큰 누락 또는 만료된 토큰 사용 시 적절히 거절됨을 확인.
 *   **유효성 검사 실패 (400 Bad Request)**: 
     *   `slot_index`가 범위를 벗어난 경우 (예: 9) 에러 메시지 반환 확인.
-    *   허용되지 않은 `planet_type` 명칭 사용 시 에러 메시지 반환 확인.
 *   **권한 위반 (400 Bad Request)**: 타인의 `repo_id`를 포함하여 요청 시 `access denied` 처리됨을 확인.
 
 ### 2. Swagger UI 테스트 방법

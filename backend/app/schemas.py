@@ -29,7 +29,6 @@ class RepoInfo(BaseModel):
 class PlanetPlacementItem(BaseModel):
     repo_id: int
     slot_index: int
-    planet_type: str
 
 class PlanetPlacementRequest(BaseModel):
     placements: List[PlanetPlacementItem]
