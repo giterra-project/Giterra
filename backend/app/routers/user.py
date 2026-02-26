@@ -68,7 +68,7 @@ async def get_user_repositoris(
         result_id.append(repo.repo_id)
         statement = select(Repository).where(
             Repository.user_id == current_user.id,
-            Repository.repo_id == repo.repo_id
+            Repository.github_repo_id == repo.repo_id
         )
         result = await db.execute(statement)
         existing_repo = result.scalars().first()
@@ -86,7 +86,7 @@ async def get_user_repositoris(
         else:
             # [INSERT] 없다면 새로 생성해서 장바구니(Session)에 담습니다.
             new_repo = Repository(
-                repo_id=repo.repo_id,
+                github_repo_id=repo.repo_id,
                 user_id=current_user.id, # type: ignore
                 repo_name=repo.name,
                 html_url=repo.url,
@@ -137,7 +137,7 @@ async def update_user_planets(
 ): 
     for place in payload.placements: 
         statement = select(Repository).where(
-            Repository.repo_id == place.repo_id,
+            Repository.id == place.repo_id,
         )
         result = await db.execute(statement)
         repo = result.scalars().first()

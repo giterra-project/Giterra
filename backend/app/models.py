@@ -20,7 +20,7 @@ class Repository(SQLModel, table=True):
     __tablename__ = "repositories"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    repo_id: int # Github상 레포지토리 고유번호
+    github_repo_id: int # Github상 레포지토리 고유번호
     user_id: int = Field(foreign_key="users.id")
     repo_name: str # 레포지토리 이름
     html_url: str # 레포지토리 url
