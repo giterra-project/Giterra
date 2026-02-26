@@ -89,4 +89,4 @@ class RepositoryResult(BaseModel):
 
 class AnalyzeResult(BaseModel): 
     summary: str
-    repos: List[RepositoryResult]
+    planets: List[RepositoryResult]

@@ -134,24 +134,23 @@ async def get_user_repositoris(
 
 @router.put("/planets", response_model=BaseResponse[None])
 async def update_user_planets(
-    request: UpdatePlanetRequest, 
+    payload: UpdatePlanetRequest, 
     current_user: User = Depends(get_current_user), 
     db: AsyncSession = Depends(get_session)
 ): 
     slots = 0
-    for repo_name in request.repos: 
+    for repo_id in payload.repos: 
         statement = select(Repository).where(
-            Repository.user_id == current_user.id,
-            Repository.repo_name == repo_name
+            Repository.repo_id == repo_id,
         )
         result = await db.execute(statement)
         repo = result.scalars().first()
         
-        # 2-2. 만약 DB에 없는 레포지토리라면 새로 생성합니다.
+        # 2-2. 만약 DB에 없는 레포지토리라면 오류메세지를 반환합니다.
         if not repo:
             return BaseResponse(
                 code=404, 
-                message=f"레포지토리 이름 오류 {repo_name}이(가) 존재하지 않습니다.", 
+                message=f"레포지토리 ID: {repo_id} 가 존재하지 않습니다.", 
                 data=None
             )
             
