@@ -42,7 +42,7 @@ class PlanetPlacementItem(BaseModel):
     slot_index: int
 
 class PlanetPlacementRequest(BaseModel):
-    placements: List[PlanetPlacementItem]
+    planets: List[PlanetPlacementItem]
 
 # 1. 가장 안쪽 데이터: 행성(레포지토리) 정보
 class PlanetInfo(BaseModel):

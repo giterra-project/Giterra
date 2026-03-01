@@ -105,7 +105,7 @@ async def get_user_repositoris(
     if result_id: 
         statement = select(Repository).where(
             Repository.user_id == current_user.id, 
-            Repository.repo_id.notin_(result_id) # type: ignore
+            Repository.github_repo_id.notin_(result_id) # type: ignore
         )
         repos_to_delete = (await db.execute(statement)).scalars().all()
 
@@ -135,9 +135,9 @@ async def update_user_planets(
     current_user: User = Depends(get_current_user), 
     db: AsyncSession = Depends(get_session)
 ): 
-    for place in payload.placements: 
+    for planet in payload.planets: 
         statement = select(Repository).where(
-            Repository.id == place.repo_id,
+            Repository.id == planet.repo_id,
         )
         result = await db.execute(statement)
         repo = result.scalars().first()
@@ -146,21 +146,21 @@ async def update_user_planets(
         if not repo:
             return BaseResponse(
                 code=404, 
-                message=f"레포지토리 ID: {place.repo_id} 가 존재하지 않습니다.", 
+                message=f"레포지토리 ID: {planet.repo_id} 가 존재하지 않습니다.", 
                 data=None
             )
         
         if repo.user_id != current_user.id: 
             return BaseResponse(
                 code=403, 
-                message=f"레포지토리 ID: {place.repo_id} 를 소유하고 있지 않습니다.", 
+                message=f"레포지토리 ID: {planet.repo_id} 를 소유하고 있지 않습니다.", 
                 data=None
             )
         
-        if not (0 <= place.slot_index <= 7):
+        if not (0 <= planet.slot_index <= 7):
             return BaseResponse(
                 code=400, 
-                message=f"레포지토리 ID: {place.repo_id} 의 슬롯이 유효하지 않습니다.", 
+                message=f"레포지토리 ID: {planet.repo_id} 의 슬롯이 유효하지 않습니다.", 
                 data=None
             )
             
@@ -168,7 +168,7 @@ async def update_user_planets(
         new_planet = Planet(
             user_id=current_user.id, # type: ignore
             repo_id=repo.id, # type: ignore
-            slot_index=place.slot_index # 0번부터 차례대로 부여됩니다!
+            slot_index=planet.slot_index # 0번부터 차례대로 부여됩니다!
         )
         db.add(new_planet)
         
