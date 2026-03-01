@@ -72,6 +72,8 @@ class UpdatePlanetRequest(BaseModel):
     repos: List[str]
 
 class RepositoryResult(BaseModel): 
+    repoId: int
+    slot: int
     repoName: str
     repoURL: str
     planetType: str
