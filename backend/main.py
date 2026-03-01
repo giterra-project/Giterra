@@ -47,10 +47,9 @@ app.add_middleware(
 
 # 분리된 Auth 라우터 등록
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
-# app.include_router(langgraph_app, prefix="/langgraph", tags=["Language Graph"])
 app.include_router(repo.router, prefix="/repos", tags=["Repositories"])
 app.include_router(analyze.router, prefix="/analyze", tags=["Analysis"])
-app.include_router(user.router, prefix="/user", tags=["User"])
+app.include_router(user.router, prefix="/user", tags=["Users"])
 
 # API 엔드포인트
 

@@ -111,6 +111,7 @@ async def get_user_repositories(username: str, db: AsyncSession):
             
             repos = [
                 RepoInfo(
+                    repo_id=r['id'], 
                     name=r['name'],
                     description=r['description'],
                     stars=r['stargazers_count'],
@@ -178,9 +179,9 @@ async def analyze_repo_details(client: httpx.AsyncClient, user: str, repo: str, 
         logger.exception(f"Error analyzing {repo}")
         return {"repo": repo, "error": str(e), "status": "failed"}
 
-async def analyze_selected_repos(request: AnalyzeRequest, db: AsyncSession):
-    user_name = request.github_username
-    repo_names = request.selected_repos
+async def analyze_selected_repos(db: AsyncSession, current_user: User):
+    user_name = current_user.username
+    repo_names = ["example"] # TODO: DB에서 등록해둔 8개의 레포지토리 가져오기
 
     if not repo_names:
         raise HTTPException(status_code=400, detail="No repos selected")
@@ -218,7 +219,7 @@ async def analyze_selected_repos(request: AnalyzeRequest, db: AsyncSession):
             
             # 개별 레포지토리 DB 저장/업데이트
             repo_name = r["repo"]
-            repo_stmt = select(Repository).where(Repository.user_id == db_user.id, Repository.name == repo_name)
+            repo_stmt = select(Repository).where(Repository.user_id == db_user.id, Repository.repo_name == repo_name)
             repo_res = await db.execute(repo_stmt)
             db_repo = repo_res.scalars().first()
             
@@ -301,3 +302,7 @@ async def analyze_selected_repos(request: AnalyzeRequest, db: AsyncSession):
             },
             "detailed_results": results
         }
+
+# TODO: 새로 분석이니 이미 저장된 레포지토리들로 바로 분석 시작, 분석 로직은 위랑 같다
+async def refresh_analyze_repos(db: AsyncSession, current_user: User):
+    return None
