@@ -1,6 +1,6 @@
-export type Language = 'KO' | 'EN';
+import type { PlanetType, SlotIndex, PlacementData } from './index';
 
-export type PlanetTheme = 'FUTURE_CITY' | 'LAB_DOME' | 'PRIMITIVE_FOREST' | 'START_TREE';
+export type Language = 'KO' | 'EN';
 
 export interface User {
     id: string;
@@ -20,17 +20,16 @@ export interface AuthState {
     resetLoggingIn: () => void;
 }
 
-export interface PlanetConfig {
-    theme: PlanetTheme;
-    repsitoryCount: number;
-    isCustomized: boolean;
-}
-
-export interface PlanetState {
-    config: PlanetConfig;
-    setTheme: (theme: PlanetTheme) => void;
-    updateConfig: (config: Partial<PlanetConfig>) => void;
-    resetConfig: () => void;
+export interface PlanetStore {
+    serverPlacements: PlacementData[];
+    localPlacements: PlacementData[];
+    isSaving: boolean;
+    errorMessage: string | null;
+    setServerPlacements: (placements: PlacementData[]) => void;
+    movePlacement: (repoId: number, targetSlot: SlotIndex, planetType: PlanetType) => void;
+    saveToServer: () => Promise<void>;
+    resetLocalChanges: () => void;
+    clearError: () => void;
 }
 
 export interface LanguageState {
