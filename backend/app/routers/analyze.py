@@ -106,7 +106,7 @@ async def perform_analysis(
 ): 
     # 지금 analyze_selected_repos는 행성 타입만 뱉고 있음
     # TODO: 따라서 랭그래프결과와 행성 타입을 모두 종합해서 뱉도록 만들어야함
-    planet_type = await analyze_selected_repos(db, current_user)
+    # planet_type = await analyze_selected_repos(db, current_user)
     
     mock_data = AnalyzeResult(
         summary="다양한 기술 스택을 넘나드는 열정적인 우주 탐험가입니다. 웹 프론트엔드부터 모바일 AR, 자율주행 시뮬레이터까지 폭넓은 영역에서 끊임없이 새로운 궤도를 개척하고 있으며, 탄탄한 알고리즘 역량을 바탕으로 안정적인 코드를 작성합니다.", 
@@ -125,7 +125,7 @@ async def refresh_analysis(
     db: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ): 
-    result = refresh_analyze_repos(db, current_user)
+    # result = refresh_analyze_repos(db, current_user)
 
     mock_data = AnalyzeResult(
         summary="다양한 기술 스택을 넘나드는 열정적인 우주 탐험가입니다. 웹 프론트엔드부터 모바일 AR, 자율주행 시뮬레이터까지 폭넓은 영역에서 끊임없이 새로운 궤도를 개척하고 있으며, 탄탄한 알고리즘 역량을 바탕으로 안정적인 코드를 작성합니다.""다양한 기술 스택을 넘나드는 열정적인 우주 탐험가입니다. 웹 프론트엔드부터 모바일 AR, 자율주행 시뮬레이터까지 폭넓은 영역에서 끊임없이 새로운 궤도를 개척하고 있으며, 탄탄한 알고리즘 역량을 바탕으로 안정적인 코드를 작성합니다.", 
@@ -145,7 +145,7 @@ async def search_analyze_repos(
     current_user: User = Depends(get_current_user)
 ): 
     # TODO: 깃허브 API로 username가 DB에 등록해놓은 레포지토리를 분석 후 결과 리턴
-    result = refresh_analyze_repos(db, current_user)
+    # result = refresh_analyze_repos(db, current_user)
 
     mock_data = AnalyzeResult(
         summary="다양한 기술 스택을 넘나드는 열정적인 우주 탐험가입니다. 웹 프론트엔드부터 모바일 AR, 자율주행 시뮬레이터까지 폭넓은 영역에서 끊임없이 새로운 궤도를 개척하고 있으며, 탄탄한 알고리즘 역량을 바탕으로 안정적인 코드를 작성합니다.", 
