@@ -14,16 +14,18 @@ class User(SQLModel, table=True):
     
     # 관계 설정
     repositories: List["Repository"] = Relationship(back_populates="owner")
-    placements: List["Placement"] = Relationship(back_populates="user")
+    planets: List["Planet"] = Relationship(back_populates="user")
 
 class Repository(SQLModel, table=True):
     __tablename__ = "repositories"
     
     id: Optional[int] = Field(default=None, primary_key=True)
+    github_repo_id: int # Github상 레포지토리 고유번호
     user_id: int = Field(foreign_key="users.id")
-    name: str # 레포지토리 이름
-    
-    analysis_type: Optional[str] = None # A/B/C/D 타입
+    repo_name: str # 레포지토리 이름
+    html_url: str # 레포지토리 url
+    description: Optional[str] = None # 레포지토리 설명
+    planet_type: Optional[str] = None # 보여질 행성타입: [수성, 금성, 지구, 화성, 목성, 토성, 천왕성, 해왕성]
     analysis_summary: Optional[str] = Field(default=None) # 분석 요약
     analysis_sub1: Optional[str] = None
     analysis_sub2: Optional[str] = None
@@ -34,16 +36,16 @@ class Repository(SQLModel, table=True):
     
     # 관계 설정
     owner: User = Relationship(back_populates="repositories")
-    placement: Optional["Placement"] = Relationship(back_populates="repository")
+    planet: Optional["Planet"] = Relationship(back_populates="repository")
 
-class Placement(SQLModel, table=True):
-    __tablename__ = "placements"
+class Planet(SQLModel, table=True):
+    __tablename__ = "planets"
     
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="users.id")
     repo_id: int = Field(foreign_key="repositories.id", unique=True)
-    slot_index: int # 0~7번 구역 인덱스
+    slot_index: int # 0~7번 행성 인덱스
     
     # 관계 설정
-    user: User = Relationship(back_populates="placements")
-    repository: Repository = Relationship(back_populates="placement")
+    user: User = Relationship(back_populates="planets")
+    repository: Repository = Relationship(back_populates="planet")
