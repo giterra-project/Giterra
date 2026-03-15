@@ -1,55 +1,177 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Stars, useTexture } from '@react-three/drei';
+import { OrbitControls, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 
-const PlanetMesh = () => {
+import { usePlanetStore } from '../../store/usePlanetStore';
+import type { PlanetStore } from '../../store/usePlanetStore';
+import type { PlanetType, SlotIndex, PlacementData } from '../../types/index';
+
+const PLANET_CONFIG: Record<PlanetType, { color: string; size: number }> = {
+    '수성': { color: '#a8a8a8', size: 0.3 },
+    '금성': { color: '#e0c090', size: 0.5 },
+    '지구': { color: '#4b90e2', size: 0.55 },
+    '화성': { color: '#e27b4b', size: 0.4 },
+    '목성': { color: '#d39c7e', size: 1.2 },
+    '토성': { color: '#e5d0a1', size: 1.0 },
+    '천왕성': { color: '#a1cce5', size: 0.8 },
+    '해왕성': { color: '#4b73e2', size: 0.75 },
+};
+
+const PLANET_TYPES: PlanetType[] = [
+    '수성', '금성', '지구', '화성', '목성', '토성', '천왕성', '해왕성'
+];
+
+const getDistance = (index: number) => 4 + index * 2.5;
+
+const Sun = () => {
     const meshRef = useRef<THREE.Mesh>(null);
-    const texture = useTexture('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg');
-
-    useFrame((state) => {
-        if (meshRef.current) {
-            meshRef.current.rotation.y += 0.002;
-            meshRef.current.position.y = Math.sin(state.clock.elapsedTime) * 0.1;
-        }
+    useFrame(() => {
+        if (meshRef.current) meshRef.current.rotation.y += 0.005;
     });
-
     return (
         <mesh ref={meshRef}>
-            <sphereGeometry args={[2.5, 64, 64]} />
-            <meshStandardMaterial map={texture} metalness={0.4} roughness={0.7} />
+            <sphereGeometry args={[2, 64, 64]} />
+            <meshBasicMaterial color="#ffcc00" />
         </mesh>
     );
 };
 
+const EmptySlot = ({ index, isHovered }: { index: SlotIndex; isHovered: boolean }) => {
+    const distance = getDistance(index);
+    return (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} userData={{ isSlot: true, slotIndex: index }}>
+            <ringGeometry args={[distance - 0.4, distance + 0.4, 64]} />
+            <meshBasicMaterial color={isHovered ? "#6366f1" : "#ffffff"} transparent opacity={isHovered ? 0.6 : 0.1} side={THREE.DoubleSide} />
+        </mesh>
+    );
+};
+
+const Planet = ({ index, type }: { index: number; type: PlanetType }) => {
+    const meshRef = useRef<THREE.Mesh>(null);
+    const groupRef = useRef<THREE.Group>(null);
+    const distance = getDistance(index);
+    const config = PLANET_CONFIG[type];
+    const speed = 0.5 / distance;
+
+    useFrame(() => {
+        if (groupRef.current) groupRef.current.rotation.y += speed * 0.01;
+        if (meshRef.current) meshRef.current.rotation.y += 0.02;
+    });
+
+    return (
+        <group ref={groupRef}>
+            <mesh ref={meshRef} position={[distance, 0, 0]}>
+                <sphereGeometry args={[config.size, 32, 32]} />
+                <meshStandardMaterial color={config.color} metalness={0.4} roughness={0.7} />
+            </mesh>
+        </group>
+    );
+};
+
+const DropDetector = ({
+    isDragging,
+    mousePosRef,
+    setHoveredSlot
+}: {
+    isDragging: boolean;
+    mousePosRef: React.MutableRefObject<THREE.Vector2>;
+    setHoveredSlot: (s: SlotIndex | null) => void;
+}) => {
+    const { camera, raycaster, scene } = useThree();
+
+    useFrame(() => {
+        if (!isDragging) return;
+        raycaster.setFromCamera(mousePosRef.current, camera);
+
+        const intersects = raycaster.intersectObjects(scene.children, true);
+        const slotIntersect = intersects.find((intersect) => intersect.object.userData?.isSlot);
+
+        if (slotIntersect) {
+            setHoveredSlot(slotIntersect.object.userData.slotIndex as SlotIndex);
+        } else {
+            setHoveredSlot(null);
+        }
+    });
+    return null;
+};
+
 const ContextCleaner = () => {
     const { gl, scene } = useThree();
-
     useEffect(() => {
         return () => {
             gl.dispose();
             scene.clear();
-            console.log("WebGL Context Disposed");
         };
     }, [gl, scene]);
-
     return null;
 };
 
 const PlanetCanvas = () => {
+    const localPlacements = usePlanetStore((state: PlanetStore) => state.localPlacements);
+    const movePlacement = usePlanetStore((state: PlanetStore) => state.movePlacement);
+    const slots: SlotIndex[] = [0, 1, 2, 3, 4, 5, 6, 7];
+
+    const [isDragging, setIsDragging] = useState(false);
+    const [hoveredSlot, setHoveredSlot] = useState<SlotIndex | null>(null);
+    const mousePosRef = useRef(new THREE.Vector2());
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(true);
+        mousePosRef.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+        mousePosRef.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const repoId = Number(e.dataTransfer.getData("repoId"));
+        if (repoId && hoveredSlot !== null) {
+            movePlacement(repoId, hoveredSlot, PLANET_TYPES[hoveredSlot]);
+        }
+        setHoveredSlot(null);
+    };
+
+    const handleDragLeave = () => {
+        setIsDragging(false);
+        setHoveredSlot(null);
+    };
+
     return (
-        <div className="w-full h-full">
+        <div
+            className="w-full h-full"
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onDragLeave={handleDragLeave}
+        >
             <Canvas
-                camera={{ position: [0, 0, 8], fov: 45 }}
+                camera={{ position: [0, 15, 25], fov: 45 }}
                 gl={{ antialias: false, powerPreference: "high-performance" }}
-                dpr={[1, 1.5]} // 해상도를 약간 낮춰 부하 감소
+                dpr={[1, 1.5]}
             >
                 <ContextCleaner />
                 <ambientLight intensity={0.5} />
-                <pointLight position={[10, 10, 10]} intensity={1.5} />
-                <PlanetMesh />
+                <pointLight position={[0, 0, 0]} intensity={2} color="#ffcc00" />
+
+                <Sun />
+
+                <group>
+                    {slots.map((slotIndex: SlotIndex) => {
+                        const placement = localPlacements.find((p: PlacementData) => p.slot_index === slotIndex);
+                        return (
+                            <group key={`slot-${slotIndex}`}>
+                                <EmptySlot index={slotIndex} isHovered={hoveredSlot === slotIndex} />
+                                {placement && <Planet index={slotIndex} type={placement.planet_type} />}
+                            </group>
+                        );
+                    })}
+                </group>
+
+                <DropDetector isDragging={isDragging} mousePosRef={mousePosRef} setHoveredSlot={setHoveredSlot} />
+
                 <Stars radius={100} depth={50} count={1000} factor={4} saturation={0} fade speed={1} />
-                <OrbitControls enableZoom={false} enablePan={false} />
+                <OrbitControls enableZoom={true} enablePan={true} maxDistance={50} minDistance={5} />
             </Canvas>
         </div>
     );

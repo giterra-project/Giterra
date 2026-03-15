@@ -231,3 +231,4 @@ build/
 dist/
 .venv/
 node_modules/
+*.session.sql
