@@ -35,7 +35,6 @@ Giterra의 목적은 단순한 GitHub 통계 표기가 아니라, **개발자의
 - 중앙 태양을 기준으로 8개 행성이 서로 다른 속도로 공전
 - 레포지토리 특성/분석 결과에 따라 행성 타입과 스킨을 결정
 - 초기 MVP는 무거운 3D 모델보다 **WebP + SVG + CSS 기반 2.5D UI**를 우선 검증
-- 기존 3D 행성 화면은 `Legacy 3D` 모드로 보존
 
 ---
 
@@ -49,7 +48,6 @@ Giterra의 목적은 단순한 GitHub 통계 표기가 아니라, **개발자의
 - Zustand
 - TanStack Query
 - Framer Motion
-- Three.js / React Three Fiber / Drei
 - CSS 기반 2.5D animation
 - WebP image assets
 
@@ -115,7 +113,6 @@ Header 로그인 버튼
 ```text
 frontend/src/components/galaxy/GalaxyOrbitPreview.tsx
 frontend/src/pages/Planet/PlanetPage.tsx
-frontend/src/pages/Planet/LegacyPlanetPage.tsx
 frontend/src/index.css
 ```
 
@@ -127,7 +124,6 @@ frontend/src/index.css
 - 각 행성별 다른 공전 속도/크기/깊이감
 - `scale`, `opacity`, `brightness`, `blur`, `z-index`로 2.5D 깊이 표현
 - PNG asset을 WebP로 최적화
-- 기존 3D 행성 화면은 `Legacy 3D` 버튼으로 lazy-load
 
 현재 asset 위치:
 
@@ -214,7 +210,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=1440
 - 인증 헤더가 `token`/`Bearer`로 혼재되어 있어 통일 필요
 - `/analyze`는 mock 데이터 중심이며 실제 분석 연동 보강 필요
 - `/user/planets` 저장 정책은 replace/upsert 기준을 명확히 정리해야 함
-- 2.5D 은하계는 아직 실제 선택 레포 데이터와 완전히 연결되지 않은 프로토타입 단계
+- 2.5D 은하계는 카드별 분석/슬롯 배치 UX와 연결된 MVP 단계
 
 ---
 
@@ -227,7 +223,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=1440
 5. 실제 selected repo 데이터를 2.5D 은하계에 바인딩
 6. 행성 타입/스킨 매핑 룰 확정
 7. `/analyze` mock 제거 및 실제 분석 결과 연결
-8. 최종 시연 모드: 2.5D 기본 + Legacy 3D 옵션 유지 여부 결정
+8. 행성 WebP 스킨/분석 룰 고도화
 
 ---
 

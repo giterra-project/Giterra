@@ -28,7 +28,6 @@
 - 선택된 레포지토리들은 중앙 태양 주변을 도는 각각의 행성이 된다.
 - 각 행성의 스타일은 레포지토리의 분석 결과에 따라 달라진다.
 - 3D 오브젝트 중심보다 **가벼운 2.5D WebP 기반 은하계 UI**를 우선 검증한다.
-- 기존 3D 행성 화면은 `Legacy 3D` 모드로 보존한다.
 
 ---
 
@@ -97,7 +96,6 @@ Header 로그인 버튼
 
 - `frontend/src/components/galaxy/GalaxyOrbitPreview.tsx`
 - `frontend/src/pages/Planet/PlanetPage.tsx`
-- `frontend/src/pages/Planet/LegacyPlanetPage.tsx`
 - `frontend/src/index.css`
 
 현재 구현 상태:
@@ -108,7 +106,6 @@ Header 로그인 버튼
 - SVG ellipse 기반 궤도선 사용
 - 행성 중심점과 궤도선이 같은 수식/radius를 공유하도록 구성
 - PNG 에셋을 WebP로 최적화하여 로딩 부담 감소
-- 기존 3D 행성 화면은 lazy-load 기반 `Legacy 3D`로 보존
 
 현재 사용 에셋:
 
@@ -341,9 +338,9 @@ JWT_SECRET_KEY=...
    - 기본 WebP 스킨 세트 정의
    - 추후 뽑기/상점형 스킨 시스템 기획
 
-5. 기존 3D 기능 정리
-   - Legacy 3D 유지 범위 결정
-   - 2.5D와 3D 중 최종 시연 모드 선택
+5. 2.5D 은하계 UX 고도화
+   - 카드별 분석/슬롯 배치 흐름 검증
+   - 행성 WebP 스킨과 분석 결과 연결 강화
 
 ---
 

@@ -2,7 +2,7 @@
 
 Giterra frontend는 React + TypeScript 기반으로, GitHub 레포지토리를 2.5D 은하계로 시각화하는 UI를 담당합니다.
 
-현재 `/planet`의 기본 화면은 **중앙 태양 + 8개 레포지토리 행성 공전 프로토타입**입니다. 기존 3D 행성 화면은 `Legacy 3D` 모드로 보존되어 있습니다.
+현재 `/planet`의 기본 화면은 **중앙 태양 + 최대 8개 레포지토리 행성 슬롯 배치/공전 UI**입니다.
 
 ---
 
@@ -14,7 +14,6 @@ Giterra frontend는 React + TypeScript 기반으로, GitHub 레포지토리를 2
 - Zustand
 - TanStack Query
 - Framer Motion
-- Three.js / React Three Fiber / Drei
 - Lucide React
 - CSS animation + SVG orbit + WebP assets
 
@@ -70,8 +69,6 @@ src/
       GalaxyOrbitPreview.tsx
     layout/
       Header.tsx
-    planet/
-      ...기존 3D planet components
   pages/
     Main/
     Login/
@@ -79,7 +76,6 @@ src/
     MyPage/
     Planet/
       PlanetPage.tsx
-      LegacyPlanetPage.tsx
   services/
     api.ts
     apiConfig.ts
@@ -120,7 +116,6 @@ Header 로그인 버튼
 ```text
 src/components/galaxy/GalaxyOrbitPreview.tsx
 src/pages/Planet/PlanetPage.tsx
-src/pages/Planet/LegacyPlanetPage.tsx
 src/index.css
 ```
 
@@ -132,7 +127,7 @@ src/index.css
 - WebP asset으로 로딩 부담 감소
 - `requestAnimationFrame`으로 공전 업데이트
 
-현재는 visual prototype이며, 다음 단계에서 실제 선택 레포 데이터와 연결합니다.
+현재는 레포지토리 카드별 분석, 슬롯 드래그 배치, 저장 UX와 연결된 MVP 화면입니다.
 
 ---
 
