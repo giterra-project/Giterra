@@ -129,6 +129,8 @@ GET /user/repos
 PUT /user/planets
 ```
 
+`GET /user/repos`는 GitHub 레포 목록을 가져와 DB에 기본 정보를 저장/갱신합니다. 이 단계에서는 행성 타입을 새로 분석하지 않습니다.
+
 `PUT /user/planets` 요청 예시:
 
 ```json
@@ -140,14 +142,49 @@ PUT /user/planets
 }
 ```
 
+`PUT /user/planets`는 이미 분석된 `repo_id`만 배치합니다. `planet_type`이 없는 레포는 먼저 `/analyze/planet-types`를 호출해야 합니다.
+
 ### Analyze
 
 ```text
 GET /analyze/
 GET /analyze/refresh
+POST /analyze/planet-types
 ```
 
-현재 `/analyze`는 mock 결과 중심이며, 실제 분석 서비스 연동이 남아 있습니다.
+`POST /analyze/planet-types` 요청 예시:
+
+```json
+{
+  "repo_ids": [1, 2, 3]
+}
+```
+
+응답 예시:
+
+```json
+{
+  "code": 200,
+  "message": "행성 타입 분석에 성공했습니다.",
+  "data": {
+    "planets": [
+      {
+        "repoId": 1,
+        "githubRepoId": 123456,
+        "repoName": "giterra",
+        "repoURL": "https://github.com/user/giterra",
+        "planetType": "EARTH",
+        "reason": "feat/구현 커밋 비중이 높아 기능 확장과 생명력이 강한 레포지토리로 판단했습니다.",
+        "totalCommits": 50,
+        "commitStats": { "feat": 10, "fix": 2 },
+        "mainLanguages": ["TypeScript", "Python"]
+      }
+    ]
+  }
+}
+```
+
+현재 `GET /analyze/`는 mock 결과 중심이며, 선택 레포 행성 타입 분석은 `POST /analyze/planet-types`가 담당합니다.
 
 ---
 

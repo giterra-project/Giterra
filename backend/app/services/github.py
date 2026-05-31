@@ -1,14 +1,14 @@
-import httpx
-import httpx
 import asyncio
 import logging
 from datetime import datetime
-from app.schemas import AnalyzeRequest, PlanetType
+import httpx
+from app.schemas import AnalyzeRequest, AnalyzedPlanetType, AnalyzePlanetTypesResult, PlanetType
 from app.schemas import RepoInfo
 from fastapi import HTTPException
 from collections import Counter
 from app.core.config import settings
 from sqlmodel import select
+from sqlalchemy import or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import User, Repository
 
@@ -38,6 +38,15 @@ COMMIT_CATEGORY_PLANET_TYPES = {
     "chore": PlanetType.URANUS,
 }
 
+COMMIT_CATEGORY_REASONS = {
+    "feat": "feat/구현 커밋 비중이 높아 기능 확장과 생명력이 강한 레포지토리로 판단했습니다.",
+    "fix": "fix/수정 커밋 비중이 높아 문제 해결과 안정화 성향이 강한 레포지토리로 판단했습니다.",
+    "docs": "docs/문서화 커밋 비중이 높아 설명과 정리 성향이 강한 레포지토리로 판단했습니다.",
+    "refactor": "refactor/개선 커밋 비중이 높아 빠른 최적화와 구조 개선 성향이 강한 레포지토리로 판단했습니다.",
+    "test": "test/검증 커밋 비중이 높아 안정성과 방어막 성향이 강한 레포지토리로 판단했습니다.",
+    "chore": "chore/설정 커밋 비중이 높아 인프라와 시스템 관리 성향이 강한 레포지토리로 판단했습니다.",
+}
+
 
 def infer_planet_type(commit_stats: dict[str, int]) -> PlanetType:
     """커밋 성향에서 레포 행성 외형 타입을 결정한다.
@@ -48,11 +57,114 @@ def infer_planet_type(commit_stats: dict[str, int]) -> PlanetType:
     if not commit_stats:
         return PlanetType.NEPTUNE
 
-    dominant_category = max(commit_stats, key=lambda key: commit_stats.get(key, 0))
-    if commit_stats.get(dominant_category, 0) <= 0:
+    sorted_stats = sorted(commit_stats.items(), key=lambda item: item[1], reverse=True)
+    dominant_category, dominant_count = sorted_stats[0]
+    if dominant_count <= 0:
         return PlanetType.NEPTUNE
 
+    if len(sorted_stats) > 1 and sorted_stats[1][1] == dominant_count:
+        return PlanetType.JUPITER
+
     return COMMIT_CATEGORY_PLANET_TYPES.get(dominant_category, PlanetType.JUPITER)
+
+
+def get_planet_type_reason(commit_stats: dict[str, int], planet_type: PlanetType) -> str:
+    if planet_type == PlanetType.NEPTUNE:
+        return "분석 가능한 커밋 데이터가 부족해 잠재력과 미지의 성격을 가진 레포지토리로 판단했습니다."
+
+    if planet_type == PlanetType.JUPITER:
+        return "여러 커밋 성향이 균형 있게 나타나 규모와 종합성이 강한 레포지토리로 판단했습니다."
+
+    dominant_category = max(commit_stats, key=lambda key: commit_stats.get(key, 0))
+    return COMMIT_CATEGORY_REASONS.get(
+        dominant_category,
+        "커밋 패턴을 종합해 가장 가까운 행성 타입으로 분류했습니다.",
+    )
+
+
+def get_github_headers(user: User) -> dict[str, str]:
+    if user.access_token:
+        return {
+            "Authorization": f"token {user.access_token}",
+            "Accept": "application/vnd.github.v3+json",
+        }
+
+    return settings.GITHUB_HEADERS
+
+
+async def analyze_selected_repo_planet_types(
+    db: AsyncSession,
+    current_user: User,
+    repo_ids: list[int],
+) -> AnalyzePlanetTypesResult:
+    unique_repo_ids = list(dict.fromkeys(repo_ids))
+    if not unique_repo_ids:
+        raise HTTPException(status_code=400, detail="분석할 레포지토리를 선택해 주세요.")
+
+    statement = select(Repository).where(
+        Repository.user_id == current_user.id,
+        or_(
+            Repository.id.in_(unique_repo_ids),  # type: ignore[union-attr]
+            Repository.github_repo_id.in_(unique_repo_ids),
+        ),
+    )
+    result = await db.execute(statement)
+    repositories = result.scalars().all()
+
+    repo_by_request_id: dict[int, Repository] = {}
+    for repo in repositories:
+        if repo.id in unique_repo_ids:
+            repo_by_request_id[repo.id] = repo  # type: ignore[index]
+        if repo.github_repo_id in unique_repo_ids:
+            repo_by_request_id[repo.github_repo_id] = repo
+
+    missing_repo_ids = [repo_id for repo_id in unique_repo_ids if repo_id not in repo_by_request_id]
+    if missing_repo_ids:
+        raise HTTPException(
+            status_code=404,
+            detail=f"소유한 레포지토리를 찾을 수 없습니다: {missing_repo_ids}",
+        )
+
+    headers = get_github_headers(current_user)
+    ordered_repositories = [repo_by_request_id[repo_id] for repo_id in unique_repo_ids]
+
+    async with httpx.AsyncClient() as client:
+        tasks = [
+            analyze_repo_details(client, current_user.username, repo.repo_name, headers)
+            for repo in ordered_repositories
+        ]
+        analysis_results = await asyncio.gather(*tasks)
+
+    planets: list[AnalyzedPlanetType] = []
+    for repo, analysis in zip(ordered_repositories, analysis_results):
+        commit_stats = analysis.get("commit_stats", {key: 0 for key in KEYWORD_MAP.keys()})
+        total_commits = analysis.get("total_commits", 0)
+        languages = analysis.get("languages", {})
+        planet_type = infer_planet_type(commit_stats)
+        reason = get_planet_type_reason(commit_stats, planet_type)
+
+        repo.planet_type = planet_type.value
+        repo.analysis_summary = reason
+        repo.last_analyzed = datetime.now()
+        if analysis.get("latest_commit_date"):
+            repo.latest_commit = analysis["latest_commit_date"]
+
+        planets.append(
+            AnalyzedPlanetType(
+                repoId=repo.id,  # type: ignore[arg-type]
+                githubRepoId=repo.github_repo_id,
+                repoName=repo.repo_name,
+                repoURL=repo.html_url,
+                planetType=planet_type,
+                reason=reason,
+                totalCommits=total_commits,
+                commitStats=commit_stats,
+                mainLanguages=list(languages.keys())[:3],
+            )
+        )
+
+    await db.commit()
+    return AnalyzePlanetTypesResult(planets=planets)
 
 async def fetch_repo_details(client: httpx.AsyncClient, user: str, repo: str, headers: dict):
     """커밋 로그와 사용 언어를 함께 수집합니다."""

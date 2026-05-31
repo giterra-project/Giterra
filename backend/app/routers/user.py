@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from app.database import get_session
 from app.core.security import get_current_user, get_session
-from app.core.config import settings
 from app.models import User, Repository, Planet
 from app.services.github import get_user_repositories
 from sqlmodel import select, delete
@@ -15,25 +14,20 @@ from app.schemas import (
     RepoListInfo,
     PlanetPlacementRequest,
     PlanetType,
-    ORBIT_PLANET_TYPES,
 )
 from datetime import datetime
 
 router = APIRouter()
 
 
-def get_orbit_planet_type(slot_index: int) -> PlanetType:
-    return ORBIT_PLANET_TYPES[slot_index]
-
-
-def resolve_repo_planet_type(raw_planet_type: str | None, slot_index: int) -> PlanetType:
+def resolve_repo_planet_type(raw_planet_type: str | None) -> PlanetType:
     try:
-        planet_type = PlanetType(raw_planet_type) if raw_planet_type else get_orbit_planet_type(slot_index)
+        planet_type = PlanetType(raw_planet_type) if raw_planet_type else PlanetType.NEPTUNE
     except ValueError:
-        return get_orbit_planet_type(slot_index)
+        return PlanetType.NEPTUNE
 
     if planet_type == PlanetType.SUN:
-        return get_orbit_planet_type(slot_index)
+        return PlanetType.NEPTUNE
 
     return planet_type
 
@@ -58,7 +52,7 @@ async def get_user_profile(
                 repoId=repo.id, # type: ignore
                 repoName=repo.repo_name,
                 repoURL=repo.html_url, 
-                planetType=resolve_repo_planet_type(repo.planet_type, p.slot_index),
+                planetType=resolve_repo_planet_type(repo.planet_type),
                 description=repo.description,
                 slot=p.slot_index
             )
@@ -109,9 +103,10 @@ async def get_user_repositoris(
             existing_repo.description = repo.description
             existing_repo.latest_commit = latest_update_date
             # 변경된 객체는 db에 별도로 add() 할 필요 없이 commit() 때 자동 반영됩니다.
+            repository = existing_repo
         else:
             # [INSERT] 없다면 새로 생성해서 장바구니(Session)에 담습니다.
-            new_repo = Repository(
+            repository = Repository(
                 github_repo_id=repo.repo_id,
                 user_id=current_user.id, # type: ignore
                 repo_name=repo.name,
@@ -119,12 +114,16 @@ async def get_user_repositoris(
                 description=repo.description,
                 latest_commit=latest_update_date
             )
-            db.add(new_repo)
+            db.add(repository)
+            await db.flush()
         
         repos.append(RepoListInfo(
-            repoId=repo.repo_id, 
+            repoId=repository.id, # type: ignore
+            githubRepoId=repo.repo_id,
             repoName=repo.name, 
             repoURL=repo.url, 
+            planetType=resolve_repo_planet_type(repository.planet_type) if repository.planet_type else None,
+            isAnalyzed=repository.planet_type is not None,
             description=repo.description
         ))
 
@@ -136,12 +135,13 @@ async def get_user_repositoris(
         repos_to_delete = (await db.execute(statement)).scalars().all()
 
         if repos_to_delete: 
+            repo_ids_to_delete = [repo.id for repo in repos_to_delete if repo.id is not None]
             await db.execute(
-                delete(Planet).where(Planet.repo_id.in_(repos_to_delete)) # type: ignore
+                delete(Planet).where(Planet.repo_id.in_(repo_ids_to_delete)) # type: ignore
             )
 
             await db.execute(
-                delete(Repository).where(Repository.id.in_(repos_to_delete)) # type: ignore
+                delete(Repository).where(Repository.id.in_(repo_ids_to_delete)) # type: ignore
             )
 
     await db.commit()
@@ -161,36 +161,48 @@ async def update_user_planets(
     current_user: User = Depends(get_current_user), 
     db: AsyncSession = Depends(get_session)
 ): 
-    for planet in payload.planets: 
-        statement = select(Repository).where(
-            Repository.id == planet.repo_id,
-        )
-        result = await db.execute(statement)
-        repo = result.scalars().first()
-        
-        # 2-2. 만약 DB에 없는 레포지토리라면 오류메세지를 반환합니다.
-        if not repo:
-            return BaseResponse(
-                code=404, 
-                message=f"레포지토리 ID: {planet.repo_id} 가 존재하지 않습니다.", 
-                data=None
-            )
-        
+    repo_ids = [planet.repo_id for planet in payload.planets]
+    slot_indexes = [planet.slot_index for planet in payload.planets]
+
+    if len(repo_ids) != len(set(repo_ids)):
+        raise HTTPException(status_code=400, detail="중복된 레포지토리가 포함되어 있습니다.")
+
+    if len(slot_indexes) != len(set(slot_indexes)):
+        raise HTTPException(status_code=400, detail="중복된 슬롯이 포함되어 있습니다.")
+
+    invalid_slots = [planet.slot_index for planet in payload.planets if not (0 <= planet.slot_index <= 7)]
+    if invalid_slots:
+        raise HTTPException(status_code=400, detail=f"유효하지 않은 슬롯이 포함되어 있습니다: {invalid_slots}")
+
+    statement = select(Repository).where(Repository.id.in_(repo_ids)) # type: ignore
+    result = await db.execute(statement)
+    repositories = result.scalars().all()
+    repo_by_id = {repo.id: repo for repo in repositories}
+
+    missing_repo_ids = [repo_id for repo_id in repo_ids if repo_id not in repo_by_id]
+    if missing_repo_ids:
+        raise HTTPException(status_code=404, detail=f"존재하지 않는 레포지토리 ID가 있습니다: {missing_repo_ids}")
+
+    for repo_id in repo_ids:
+        repo = repo_by_id[repo_id]
         if repo.user_id != current_user.id: 
-            return BaseResponse(
-                code=403, 
-                message=f"레포지토리 ID: {planet.repo_id} 를 소유하고 있지 않습니다.", 
-                data=None
-            )
-        
-        if not (0 <= planet.slot_index <= 7):
-            return BaseResponse(
-                code=400, 
-                message=f"레포지토리 ID: {planet.repo_id} 의 슬롯이 유효하지 않습니다.", 
-                data=None
+            raise HTTPException(status_code=403, detail=f"레포지토리 ID: {repo_id} 를 소유하고 있지 않습니다.")
+
+        try:
+            planet_type = PlanetType(repo.planet_type) if repo.planet_type else None
+        except ValueError:
+            planet_type = None
+
+        if planet_type is None or planet_type == PlanetType.SUN:
+            raise HTTPException(
+                status_code=400,
+                detail=f"레포지토리 ID: {repo_id} 의 행성 타입 분석이 필요합니다.",
             )
 
-        repo.planet_type = get_orbit_planet_type(planet.slot_index).value
+    await db.execute(delete(Planet).where(Planet.user_id == current_user.id))
+
+    for planet in payload.planets:
+        repo = repo_by_id[planet.repo_id]
             
         # 2-3. Planet 테이블에 행성을 하나씩 배치합니다.
         new_planet = Planet(

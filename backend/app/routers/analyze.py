@@ -1,12 +1,38 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_session
-from app.schemas import AnalyzeRequest, BaseResponse, RepositoryResult, AnalyzeResult, PlanetType
-from app.services.github import analyze_selected_repos, refresh_analyze_repos
+from app.schemas import (
+    AnalyzePlanetTypesRequest,
+    AnalyzePlanetTypesResult,
+    BaseResponse,
+    RepositoryResult,
+    AnalyzeResult,
+    PlanetType,
+)
+from app.services.github import analyze_selected_repo_planet_types, analyze_selected_repos, refresh_analyze_repos
 from app.core.security import get_current_user
 from app.models import User
 
 router = APIRouter()
+
+@router.post("/planet-types", response_model=BaseResponse[AnalyzePlanetTypesResult])
+async def analyze_planet_types(
+    payload: AnalyzePlanetTypesRequest,
+    db: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    result = await analyze_selected_repo_planet_types(
+        db=db,
+        current_user=current_user,
+        repo_ids=payload.repo_ids,
+    )
+
+    return BaseResponse(
+        code=200,
+        message="행성 타입 분석에 성공했습니다.",
+        data=result,
+    )
+
 
 mock_repo = [
     RepositoryResult(
@@ -121,7 +147,6 @@ async def perform_analysis(
 
 @router.get("/refresh", response_model=BaseResponse[AnalyzeResult])
 async def refresh_analysis(
-    request = AnalyzeRequest, 
     db: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ): 
@@ -138,7 +163,7 @@ async def refresh_analysis(
         data=mock_data
     )
 
-@router.get("search/(username)", response_model=BaseResponse[AnalyzeResult])
+@router.get("/search/{username}", response_model=BaseResponse[AnalyzeResult])
 async def search_analyze_repos(
     username: str, 
     db: AsyncSession = Depends(get_session),

@@ -75,6 +75,30 @@ class PlanetPlacementItem(BaseModel):
 class PlanetPlacementRequest(BaseModel):
     planets: List[PlanetPlacementItem]
 
+
+class AnalyzePlanetTypesRequest(BaseModel):
+    repo_ids: List[int] = Field(
+        min_length=1,
+        max_length=8,
+        description="행성 타입을 분석할 레포지토리 ID 목록. /user/repos의 repoId를 사용한다.",
+    )
+
+
+class AnalyzedPlanetType(BaseModel):
+    repoId: int
+    githubRepoId: int
+    repoName: str
+    repoURL: str
+    planetType: PlanetType
+    reason: str
+    totalCommits: int
+    commitStats: dict[str, int]
+    mainLanguages: List[str]
+
+
+class AnalyzePlanetTypesResult(BaseModel):
+    planets: List[AnalyzedPlanetType]
+
 # 1. 가장 안쪽 데이터: 행성(레포지토리) 정보
 class PlanetInfo(BaseModel):
     repoId: int
@@ -86,8 +110,11 @@ class PlanetInfo(BaseModel):
 
 class RepoListInfo(BaseModel): 
     repoId: int
+    githubRepoId: int
     repoName: str
     repoURL: str
+    planetType: Optional[PlanetType] = None
+    isAnalyzed: bool = False
     description: Optional[str] = None
 
 class MyRepositories(BaseModel): 
