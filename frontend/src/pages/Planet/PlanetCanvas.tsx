@@ -5,22 +5,20 @@ import * as THREE from 'three';
 
 import { usePlanetStore } from '../../store/usePlanetStore';
 import type { PlanetStore } from '../../store/usePlanetStore';
+import { ORBIT_PLANET_TYPES } from '../../types/index';
 import type { PlanetType, SlotIndex, PlacementData } from '../../types/index';
 
 const PLANET_CONFIG: Record<PlanetType, { color: string; size: number }> = {
-    '수성': { color: '#a8a8a8', size: 0.3 },
-    '금성': { color: '#e0c090', size: 0.5 },
-    '지구': { color: '#4b90e2', size: 0.55 },
-    '화성': { color: '#e27b4b', size: 0.4 },
-    '목성': { color: '#d39c7e', size: 1.2 },
-    '토성': { color: '#e5d0a1', size: 1.0 },
-    '천왕성': { color: '#a1cce5', size: 0.8 },
-    '해왕성': { color: '#4b73e2', size: 0.75 },
+    SUN: { color: '#ffcc00', size: 2 },
+    MERCURY: { color: '#a8a8a8', size: 0.3 },
+    VENUS: { color: '#e0c090', size: 0.5 },
+    EARTH: { color: '#4b90e2', size: 0.55 },
+    MARS: { color: '#e27b4b', size: 0.4 },
+    JUPITER: { color: '#d39c7e', size: 1.2 },
+    SATURN: { color: '#e5d0a1', size: 1.0 },
+    URANUS: { color: '#a1cce5', size: 0.8 },
+    NEPTUNE: { color: '#4b73e2', size: 0.75 },
 };
-
-const PLANET_TYPES: PlanetType[] = [
-    '수성', '금성', '지구', '화성', '목성', '토성', '천왕성', '해왕성'
-];
 
 const getDistance = (index: number) => 4 + index * 2.5;
 
@@ -128,7 +126,7 @@ const PlanetCanvas = () => {
         setIsDragging(false);
         const repoId = Number(e.dataTransfer.getData("repoId"));
         if (repoId && hoveredSlot !== null) {
-            movePlacement(repoId, hoveredSlot, PLANET_TYPES[hoveredSlot]);
+            movePlacement(repoId, hoveredSlot, ORBIT_PLANET_TYPES[hoveredSlot]);
         }
         setHoveredSlot(null);
     };

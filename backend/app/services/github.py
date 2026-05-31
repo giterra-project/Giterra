@@ -3,7 +3,7 @@ import httpx
 import asyncio
 import logging
 from datetime import datetime
-from app.schemas import AnalyzeRequest
+from app.schemas import AnalyzeRequest, PlanetType
 from app.schemas import RepoInfo
 from fastapi import HTTPException
 from collections import Counter
@@ -28,6 +28,31 @@ KEYWORD_MAP = {
     "test": ["test", "testing", "spec", "테스트"],
     "chore": ["chore", "build", "config", "setting", "설정", "배포"]
 }
+
+COMMIT_CATEGORY_PLANET_TYPES = {
+    "feat": PlanetType.EARTH,
+    "fix": PlanetType.MARS,
+    "docs": PlanetType.VENUS,
+    "refactor": PlanetType.MERCURY,
+    "test": PlanetType.SATURN,
+    "chore": PlanetType.URANUS,
+}
+
+
+def infer_planet_type(commit_stats: dict[str, int]) -> PlanetType:
+    """커밋 성향에서 레포 행성 외형 타입을 결정한다.
+
+    SUN은 중앙 항성 전용이므로 레포지토리 분석 결과에는 배정하지 않는다.
+    """
+
+    if not commit_stats:
+        return PlanetType.NEPTUNE
+
+    dominant_category = max(commit_stats, key=lambda key: commit_stats.get(key, 0))
+    if commit_stats.get(dominant_category, 0) <= 0:
+        return PlanetType.NEPTUNE
+
+    return COMMIT_CATEGORY_PLANET_TYPES.get(dominant_category, PlanetType.JUPITER)
 
 async def fetch_repo_details(client: httpx.AsyncClient, user: str, repo: str, headers: dict):
     """커밋 로그와 사용 언어를 함께 수집합니다."""
@@ -223,11 +248,9 @@ async def analyze_selected_repos(db: AsyncSession, current_user: User):
             repo_res = await db.execute(repo_stmt)
             db_repo = repo_res.scalars().first()
             
-            # 레포별 성향 결정 (간단)
+            # 레포별 행성 외형 결정
             repo_stats = r["commit_stats"]
-            repo_type = "Normal"
-            if repo_stats["feat"] > repo_stats["fix"]: repo_type = "Builder"
-            elif repo_stats["fix"] > 0: repo_type = "Fixer"
+            planet_type = infer_planet_type(repo_stats).value
 
             # 최신 커밋 날짜 추출
             latest_commit_date = None
@@ -235,7 +258,7 @@ async def analyze_selected_repos(db: AsyncSession, current_user: User):
                 latest_commit_date = r["latest_commit_date"]
 
             if db_repo:
-                db_repo.analysis_type = repo_type
+                db_repo.planet_type = planet_type
                 db_repo.analysis_summary = f"Commits: {r['total_commits']}, Langs: {list(r['languages'].keys())}"
                 db_repo.last_analyzed = datetime.now()
                 if latest_commit_date:
@@ -243,8 +266,10 @@ async def analyze_selected_repos(db: AsyncSession, current_user: User):
             else:
                 db_repo = Repository(
                     user_id=db_user.id,
-                    name=repo_name,
-                    analysis_type=repo_type,
+                    github_repo_id=0,
+                    repo_name=repo_name,
+                    html_url=f"https://github.com/{user_name}/{repo_name}",
+                    planet_type=planet_type,
                     analysis_summary=f"Commits: {r['total_commits']}, Langs: {list(r['languages'].keys())}",
                     last_analyzed=datetime.now(),
                     latest_commit=latest_commit_date

@@ -1,9 +1,40 @@
+from enum import Enum
 from pydantic import BaseModel, Field
 from typing import List, Optional, Generic, TypeVar
 
 
 # 1. 제네릭 타입 변수 T 선언 (어떤 데이터든 들어올 수 있다는 뜻)
 T = TypeVar("T")
+
+
+class PlanetType(str, Enum):
+    """Giterra에서 사용하는 행성 외형 타입의 정본.
+
+    SUN은 중앙 항성이고, 나머지 8개는 사용자가 선택한 레포지토리 행성에 배정된다.
+    API 응답/프론트 타입은 이 영문 enum value를 기준으로 맞춘다.
+    """
+
+    SUN = "SUN"
+    MERCURY = "MERCURY"
+    VENUS = "VENUS"
+    EARTH = "EARTH"
+    MARS = "MARS"
+    JUPITER = "JUPITER"
+    SATURN = "SATURN"
+    URANUS = "URANUS"
+    NEPTUNE = "NEPTUNE"
+
+
+ORBIT_PLANET_TYPES: tuple[PlanetType, ...] = (
+    PlanetType.MERCURY,
+    PlanetType.VENUS,
+    PlanetType.EARTH,
+    PlanetType.MARS,
+    PlanetType.JUPITER,
+    PlanetType.SATURN,
+    PlanetType.URANUS,
+    PlanetType.NEPTUNE,
+)
 
 # 2. 만능 껍데기 BaseResponse 정의
 class BaseResponse(BaseModel, Generic[T]):
@@ -50,6 +81,7 @@ class PlanetInfo(BaseModel):
     slot: int
     repoName: str
     repoURL: str
+    planetType: PlanetType
     description: Optional[str] = None # 설명이 없는 레포도 있으니 Optional 처리
 
 class RepoListInfo(BaseModel): 
@@ -76,7 +108,7 @@ class RepositoryResult(BaseModel):
     slot: int
     repoName: str
     repoURL: str
-    planetType: str
+    planetType: PlanetType
     repoSummary: str
     aspect_1: str
     aspect_2: str

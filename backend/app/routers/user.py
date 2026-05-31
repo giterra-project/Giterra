@@ -7,10 +7,35 @@ from app.services.github import get_user_repositories
 from sqlmodel import select, delete
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas import BaseResponse, UserProfileData, PlanetInfo, MyRepositories, RepoListInfo, PlanetPlacementRequest
+from app.schemas import (
+    BaseResponse,
+    UserProfileData,
+    PlanetInfo,
+    MyRepositories,
+    RepoListInfo,
+    PlanetPlacementRequest,
+    PlanetType,
+    ORBIT_PLANET_TYPES,
+)
 from datetime import datetime
 
 router = APIRouter()
+
+
+def get_orbit_planet_type(slot_index: int) -> PlanetType:
+    return ORBIT_PLANET_TYPES[slot_index]
+
+
+def resolve_repo_planet_type(raw_planet_type: str | None, slot_index: int) -> PlanetType:
+    try:
+        planet_type = PlanetType(raw_planet_type) if raw_planet_type else get_orbit_planet_type(slot_index)
+    except ValueError:
+        return get_orbit_planet_type(slot_index)
+
+    if planet_type == PlanetType.SUN:
+        return get_orbit_planet_type(slot_index)
+
+    return planet_type
 
 @router.get("/profile", response_model=BaseResponse[UserProfileData])
 async def get_user_profile(
@@ -33,6 +58,7 @@ async def get_user_profile(
                 repoId=repo.id, # type: ignore
                 repoName=repo.repo_name,
                 repoURL=repo.html_url, 
+                planetType=resolve_repo_planet_type(repo.planet_type, p.slot_index),
                 description=repo.description,
                 slot=p.slot_index
             )
@@ -163,6 +189,8 @@ async def update_user_planets(
                 message=f"레포지토리 ID: {planet.repo_id} 의 슬롯이 유효하지 않습니다.", 
                 data=None
             )
+
+        repo.planet_type = get_orbit_planet_type(planet.slot_index).value
             
         # 2-3. Planet 테이블에 행성을 하나씩 배치합니다.
         new_planet = Planet(

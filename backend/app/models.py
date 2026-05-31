@@ -25,7 +25,10 @@ class Repository(SQLModel, table=True):
     repo_name: str # 레포지토리 이름
     html_url: str # 레포지토리 url
     description: Optional[str] = None # 레포지토리 설명
-    planet_type: Optional[str] = None # 보여질 행성타입: [수성, 금성, 지구, 화성, 목성, 토성, 천왕성, 해왕성]
+    # 보여질 행성 외형 타입.
+    # 정본 enum value는 app.schemas.PlanetType:
+    # [SUN, MERCURY, VENUS, EARTH, MARS, JUPITER, SATURN, URANUS, NEPTUNE]
+    planet_type: Optional[str] = None
     analysis_summary: Optional[str] = Field(default=None) # 분석 요약
     analysis_sub1: Optional[str] = None
     analysis_sub2: Optional[str] = None
