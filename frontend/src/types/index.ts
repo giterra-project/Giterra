@@ -108,6 +108,36 @@ export interface PlacementData {
     planet_type: PlanetType;
 }
 
+export interface UserRepoListItem {
+    repoId: number;
+    githubRepoId: number;
+    repoName: string;
+    repoURL: string;
+    planetType: PlanetType | null;
+    isAnalyzed: boolean;
+    description?: string | null;
+}
+
+export interface AnalyzePlanetTypesRequest {
+    repo_ids: number[];
+}
+
+export interface AnalyzedPlanetType {
+    repoId: number;
+    githubRepoId: number;
+    repoName: string;
+    repoURL: string;
+    planetType: PlanetType;
+    reason: string;
+    totalCommits: number;
+    commitStats: Record<string, number>;
+    mainLanguages: string[];
+}
+
+export interface AnalyzePlanetTypesResult {
+    planets: AnalyzedPlanetType[];
+}
+
 export interface SolarSystemConfig {
     userId: number;
     placements: PlacementData[];
